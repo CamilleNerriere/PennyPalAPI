@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.CompilerServices;
 using Microsoft.EntityFrameworkCore;
+using PennyPal.Dtos;
 using PennyPal.Exceptions;
 using PennyPal.Models;
 
@@ -22,51 +24,55 @@ namespace PennyPal.Data.Repositories
 
         public async Task<User?> GetUserById(int userId)
         {
-            User? user =  await _entityFramework.User.FindAsync(userId);
+            User? user = await _entityFramework.User.FindAsync(userId);
 
             if (user != null)
             {
                 return user;
             }
-            else 
-            {
-                throw new NotFoundException($"User {userId} not found");
-            }
+
+            throw new NotFoundException($"User {userId} not found");
+        }
+
+        public async Task<User?> GetUserByEmail(UserDto userDto)
+        {
+            return await _entityFramework.User
+                .FirstOrDefaultAsync(e => e.Email == userDto.Email);
+
         }
 
         public async Task AddUser(User user)
         {
-            if (user != null)
+            if (user == null)
             {
-                await _entityFramework.AddAsync(user);
+                throw new CustomValidationException("User object is null or empty");
             }
 
-            throw new CustomValidationException("Please, add some user informations.");
+            await _entityFramework.User.AddAsync(user);
+            await _entityFramework.SaveChangesAsync();
+
         }
 
         public async Task UpdateUser(User user)
         {
-            if (user != null)
+            if (user == null)
             {
-                User? userToUpdate = await _entityFramework.User.FindAsync(user.Id);
-
-                if (userToUpdate != null)
-                {
-                    userToUpdate.Firstname = user.Firstname ?? userToUpdate.Firstname;
-                    userToUpdate.Lastname = user.Lastname ?? userToUpdate.Lastname;
-                    userToUpdate.Email = user.Email ?? userToUpdate.Email;
-                    await _entityFramework.SaveChangesAsync();
-                }
-                throw new Exception("Unable to Update");
+                throw new CustomValidationException("User object is null or emptuy");
             }
-            throw new NotFoundException("User not found.");
+
+            User? userToUpdate = await _entityFramework.User.FindAsync(user.Id) ?? throw new NotFoundException("User not Found");
+            userToUpdate.Firstname = user.Firstname ?? userToUpdate.Firstname;
+            userToUpdate.Lastname = user.Lastname ?? userToUpdate.Lastname;
+            userToUpdate.Email = user.Email ?? userToUpdate.Email;
+            await _entityFramework.SaveChangesAsync();
+
         }
 
         public async Task DeleteUser(int userId)
         {
             User? user = await _entityFramework.User.FindAsync(userId);
 
-            if(user != null)
+            if (user != null)
             {
                 _entityFramework.Remove(user);
                 await _entityFramework.SaveChangesAsync();

@@ -13,6 +13,7 @@ namespace PennyPal.Data.Configurations
 
             builder.Property(e => e.Id).HasColumnName("id");
             builder.Property(e => e.Email).HasColumnName("email").IsRequired();
+            builder.HasAlternateKey(e => e.Email);
             builder.Property(e => e.Lastname).HasColumnName("lastname").IsRequired();
             builder.Property(e => e.Firstname).HasColumnName("firstname").IsRequired();
 

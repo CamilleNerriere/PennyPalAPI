@@ -1,12 +1,20 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using PennyPal.Data;
+using PennyPal.Data.Repositories;
 using PennyPal.Filters;
 using PennyPal.Middlewares;
+using PennyPal.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<AppExceptionFilter>();
+});
+
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -51,14 +59,17 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.TokenValidationParameters = tokenValidationParameters;
     });
 
-builder.Services.AddControllers(options =>
-{
-    options.Filters.Add<AppExceptionFilter>();
-});
+builder.Services.AddDbContext<DataContextEF>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
+
+builder.Services.AddLogging();
 
 var app = builder.Build();
 
-app.UseMiddleware<GlobalExceptionMiddleware>();
+// app.UseMiddleware<GlobalExceptionMiddleware>();
 // Security HTTP Middleware.
 if (app.Environment.IsDevelopment())
 {

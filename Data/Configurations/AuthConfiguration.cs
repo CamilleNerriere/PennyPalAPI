@@ -15,10 +15,12 @@ namespace PennyPal.Data.Configurations
             builder.Property(e => e.PasswordHash).HasColumnName("password_hash").IsRequired();
             builder.Property(e => e.PasswordSalt).HasColumnName("password_salt").IsRequired();
             builder.Property(e => e.Role).HasColumnName("role").HasDefaultValue("user").HasMaxLength(50);
-            
+
+        
             builder.HasOne(e => e.User)
                 .WithOne(e => e.Auth)
                 .HasForeignKey<Auth>(e => e.Email)
+                .HasPrincipalKey<User>(u => u.Email)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }
