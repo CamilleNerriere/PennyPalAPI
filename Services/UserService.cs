@@ -44,7 +44,7 @@ namespace PennyPal.Services
             await _userRepository.AddUser(user);
         }
 
-        public async Task UpdateUser(User user)
+        public async Task UpdateUser(UserUpdateDto user)
         {
             await _userRepository.UpdateUser(user);
         }

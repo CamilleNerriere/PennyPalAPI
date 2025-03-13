@@ -53,17 +53,16 @@ namespace PennyPal.Data.Repositories
 
         }
 
-        public async Task UpdateUser(User user)
+        public async Task UpdateUser(UserUpdateDto user)
         {
             if (user == null)
             {
                 throw new CustomValidationException("User object is null or emptuy");
             }
-
             User? userToUpdate = await _entityFramework.User.FindAsync(user.Id) ?? throw new NotFoundException("User not Found");
             userToUpdate.Firstname = user.Firstname ?? userToUpdate.Firstname;
             userToUpdate.Lastname = user.Lastname ?? userToUpdate.Lastname;
-            userToUpdate.Email = user.Email ?? userToUpdate.Email;
+
             await _entityFramework.SaveChangesAsync();
 
         }
@@ -77,7 +76,11 @@ namespace PennyPal.Data.Repositories
                 _entityFramework.Remove(user);
                 await _entityFramework.SaveChangesAsync();
             }
-            throw new NotFoundException("User not found");
+            else
+            {
+                throw new NotFoundException("User not found");
+
+            }
         }
 
     }

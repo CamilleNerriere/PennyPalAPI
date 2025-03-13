@@ -8,7 +8,7 @@ namespace PennyPal.Services
         Task<IEnumerable<User>> GetUsers();
         Task<User?> GetUserById(int userId);
         Task AddUser(UserDto user);
-        Task UpdateUser(User user);
+        Task UpdateUser(UserUpdateDto user);
         Task DeleteUser(int userId);
     }
 }

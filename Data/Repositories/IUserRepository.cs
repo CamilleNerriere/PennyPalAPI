@@ -11,7 +11,7 @@ namespace PennyPal.Data.Repositories
         Task<User?> GetUserById(int userId);
         Task<User?> GetUserByEmail(UserDto userDto);
         Task AddUser(User user);
-        Task UpdateUser(User user);
+        Task UpdateUser(UserUpdateDto user);
         Task DeleteUser(int userId);
     }
 }
