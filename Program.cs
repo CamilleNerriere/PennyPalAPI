@@ -1,6 +1,8 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using PennyPal.Filters;
+using PennyPal.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,35 +46,56 @@ TokenValidationParameters tokenValidationParameters = new TokenValidationParamet
 }; // Il faudrait en réalité ici check si on est en développement/ en prod, ce serait différent 
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options => {
+    .AddJwtBearer(options =>
+    {
         options.TokenValidationParameters = tokenValidationParameters;
     });
 
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<AppExceptionFilter>();
+});
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+app.UseMiddleware<GlobalExceptionMiddleware>();
+// Security HTTP Middleware.
 if (app.Environment.IsDevelopment())
 {
-    app.UseCors("DevCors");
-    app.MapOpenApi();
+    app.UseDeveloperExceptionPage();
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 else
 {
-    app.UseCors("ProdCors");
+    app.UseExceptionHandler("/Error");
+    app.UseHsts(); // HTTP Strict Transport Security
     app.UseHttpsRedirection();
+
 }
 
-// app.UseHttpsRedirection();
+app.UseStaticFiles();
+// app.UseResponseCompression();
 
-app.UseAuthentication(); 
+app.UseRouting();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseCors("DevCors");
+
+}
+else
+{
+    app.UseCors("ProdCors");
+
+}
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
 app.MapControllers();
-
+app.MapOpenApi();
 
 app.Run();
 
