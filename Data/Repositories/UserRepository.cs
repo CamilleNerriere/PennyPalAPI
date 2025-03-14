@@ -49,7 +49,6 @@ namespace PennyPal.Data.Repositories
             }
 
             await _entityFramework.User.AddAsync(user);
-            await _entityFramework.SaveChangesAsync();
 
         }
 
@@ -74,13 +73,16 @@ namespace PennyPal.Data.Repositories
             if (user != null)
             {
                 _entityFramework.Remove(user);
-                await _entityFramework.SaveChangesAsync();
             }
             else
             {
                 throw new NotFoundException("User not found");
 
             }
+        }
+        public async Task SaveChangesAsync()
+        {
+            await _entityFramework.SaveChangesAsync();
         }
 
     }

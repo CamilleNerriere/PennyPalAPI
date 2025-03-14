@@ -13,5 +13,7 @@ namespace PennyPal.Data.Repositories
         Task AddUser(User user);
         Task UpdateUser(UserUpdateDto user);
         Task DeleteUser(int userId);
+        Task SaveChangesAsync();
+
     }
 }
