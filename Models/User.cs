@@ -21,5 +21,10 @@ namespace PennyPal.Models
         public virtual ICollection<ExpenseCategory>? ExpenseCategories {get; set;}
 
         public virtual ICollection<Expense>? Expenses {get; set;}
+
+        internal static string FindFirst(string v)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
