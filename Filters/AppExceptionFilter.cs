@@ -20,30 +20,24 @@ namespace PennyPal.Filters
 
             if (ex is NotFoundException notFoundEx)
             {
-                context.Result = new ObjectResult(new
+                _logger.LogWarning(ex, "Not Found");
+                context.Result = new NotFoundObjectResult(new
                 {
                     StatusCode = 404,
                     Message = notFoundEx.Message
-                })
-                {
-                    StatusCode = 404
-                };
+                });
 
-                _logger.LogWarning(ex, "Not Found");
 
             }
 
             else if (ex is CustomValidationException validationEx)
             {
-                context.Result = new ObjectResult(new
+                _logger.LogWarning(ex, "Validation error");
+                context.Result = new BadRequestObjectResult(new
                 {
                     StatusCode = 400,
                     Message = validationEx.Message
-                })
-                {
-                    StatusCode = 400
-                };
-                _logger.LogWarning(ex, "Validation error");
+                });
 
             }
             context.ExceptionHandled = true;
