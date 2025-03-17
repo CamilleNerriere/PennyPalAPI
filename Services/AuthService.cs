@@ -39,7 +39,9 @@ namespace PennyPal.Services
                 throw new CustomValidationException("Password and Confirm Password must be the same");
             }
 
-            if (_authRepository.GetAuthByEmail(user.Email) != null)
+            Auth? auth = await _authRepository.GetAuthByEmail(user.Email);
+
+            if (auth != null)
             {
                 throw new CustomValidationException("user already exists");
             }
@@ -67,20 +69,33 @@ namespace PennyPal.Services
                 Email = user.Email,
             };
 
-            using IDbContextTransaction transaction = await _authRepository.BeginTransactionAsync();
-            try
-            {
-                await _authRepository.AddAuth(authToRegister);
-                await _userRepository.AddUser(userToRegister);
-                await _authRepository.SaveChangesAsync();
-                await _userRepository.SaveChangesAsync();
-                await transaction.CommitAsync();
-            }
-            catch (System.Exception)
-            {
-                await transaction.RollbackAsync();
-                throw new Exception("Unable to register user");
-            }
+            IExecutionStrategy strategy = _authRepository.GetExecutionStrategy();
+
+            await strategy.ExecuteAsync(
+                state: (authToRegister, userToRegister),
+                operation: async (dbContext, state, cancellationToken) =>
+                {
+                    using var transaction = await _authRepository.BeginTransactionAsync(cancellationToken);
+                    try
+                    {
+
+                        await _userRepository.AddUser(state.userToRegister, cancellationToken);
+                        await _userRepository.SaveChangesAsync(cancellationToken);
+                        await _authRepository.AddAuth(state.authToRegister, cancellationToken);
+                        await _authRepository.SaveChangesAsync(cancellationToken);
+                        await transaction.CommitAsync(cancellationToken);
+
+                        return true;
+                    }
+                    catch (Exception)
+                    {
+                        await transaction.RollbackAsync(cancellationToken);
+                        throw new Exception("Unable to register user");
+                    }
+                },
+                    verifySucceeded: null
+            );
+
         }
 
         public async Task<Dictionary<string, string>> Login(UserLoginDto user)
@@ -103,7 +118,7 @@ namespace PennyPal.Services
             }
 
             UserDto UserMapped = _mapper.Map<UserDto>(user);
-            
+
             User? userComplete = await _userRepository.GetUserByEmail(UserMapped) ?? throw new NotFoundException("User not found");
 
             return new Dictionary<string, string>{
@@ -116,11 +131,11 @@ namespace PennyPal.Services
 
         public async Task UpdatePassword(UserLoginDto userToUpdate)
         {
-            if(userToUpdate == null)
+            if (userToUpdate == null)
             {
                 throw new CustomValidationException("Missing credentials");
             }
-            
+
             byte[] passwordSalt = new byte[128 / 8];
             using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
             {
@@ -143,24 +158,9 @@ namespace PennyPal.Services
         public async Task DeleteAccount(string userId)
         {
             int userIdInt = Int32.Parse(userId);
-            User? userToDelete = await _userRepository.GetUserById(userIdInt) ?? throw new NotFoundException("User not found");
-
-            Auth? authToDelete = await _authRepository.GetAuthByEmail(userToDelete.Email) ?? throw new NotFoundException("User not found");
-
-            using IDbContextTransaction transaction = await _authRepository.BeginTransactionAsync();
-            try
-            {
-                await _authRepository.DeleteAuth(authToDelete);
-                await _userRepository.DeleteUser(userToDelete.Id);
-                await _authRepository.SaveChangesAsync();
-                await _userRepository.SaveChangesAsync();
-                await transaction.CommitAsync();
-            }
-            catch (System.Exception)
-            {
-                await transaction.RollbackAsync();
-                throw new Exception("Unable to delete user");
-            }
+            await _userRepository.DeleteUser(userIdInt);
+            await _userRepository.SaveChangesAsync();
+            
         }
     }
 }

@@ -64,12 +64,14 @@ builder.Services.AddDbContext<DataContextEF>(options =>
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddLogging();
 
 var app = builder.Build();
 
-// app.UseMiddleware<GlobalExceptionMiddleware>();
+app.UseMiddleware<GlobalExceptionMiddleware>();
 // Security HTTP Middleware.
 if (app.Environment.IsDevelopment())
 {
