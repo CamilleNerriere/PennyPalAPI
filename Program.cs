@@ -6,6 +6,7 @@ using PennyPal.Data;
 using PennyPal.Data.Repositories;
 using PennyPal.Filters;
 using PennyPal.Middlewares;
+using PennyPal.Repositories;
 using PennyPal.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -68,6 +69,9 @@ builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IExpenseCategoryRepository, ExpenseCategoryRepository>();
 builder.Services.AddScoped<IExpenseCategoryService, ExpenseCategoryService>();
+builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>();
+builder.Services.AddScoped<IExpenseService, ExpenseService>();
+
 
 builder.Services.AddLogging();
 builder.Logging.AddConsole();
