@@ -41,14 +41,14 @@ namespace PennyPal.Data.Repositories
 
         }
 
-        public async Task AddUser(User user)
+        public async Task AddUser(User user, CancellationToken cancellationToken = default)
         {
             if (user == null)
             {
                 throw new CustomValidationException("User object is null or empty");
             }
 
-            await _entityFramework.User.AddAsync(user);
+            await _entityFramework.User.AddAsync(user, cancellationToken);
 
         }
 
@@ -58,7 +58,7 @@ namespace PennyPal.Data.Repositories
             {
                 throw new CustomValidationException("User object is null or emptuy");
             }
-            User? userToUpdate = await _entityFramework.User.FindAsync(user.Id) ?? throw new NotFoundException("User not Found");
+            User? userToUpdate = await _entityFramework.User.FindAsync(user.Id) ?? throw new NotFoundException("User not Found - USER");
             userToUpdate.Firstname = user.Firstname ?? userToUpdate.Firstname;
             userToUpdate.Lastname = user.Lastname ?? userToUpdate.Lastname;
 
@@ -80,9 +80,9 @@ namespace PennyPal.Data.Repositories
 
             }
         }
-        public async Task SaveChangesAsync()
+        public async Task SaveChangesAsync(CancellationToken cancellationToken=default)
         {
-            await _entityFramework.SaveChangesAsync();
+            await _entityFramework.SaveChangesAsync(cancellationToken);
         }
 
     }
