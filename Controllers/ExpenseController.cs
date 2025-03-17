@@ -36,5 +36,22 @@ namespace PennyPal.Controllers
 
             return Ok(expenses);
         }
+
+        [Authorize]
+        [HttpGet("Tendances")]
+        public async Task<IActionResult> GetExpensesTendances([FromQuery] ExpenseTendancesFilterDto filters)
+        {
+            Claim? userIdClaim = User.FindFirst("userId");
+            if (userIdClaim == null || string.IsNullOrEmpty(userIdClaim.Value))
+            {
+                throw new NotFoundException("User Not Found");
+            }
+
+            int userId = Int32.Parse(userIdClaim.Value);
+
+            decimal expenses = await _expenseService.GetExpensesTendances(userId, filters);
+
+            return Ok(expenses);
+        }
     }
 }
