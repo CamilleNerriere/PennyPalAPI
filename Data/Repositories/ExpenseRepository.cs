@@ -14,7 +14,7 @@ namespace PennyPal.Repositories
             _entityFramework = entityFramework;
         }
 
-        public async Task<IEnumerable<Expense>> GetExpensesByFilters(int userId,ExpenseFilterDto filters)
+        public async Task<IEnumerable<Expense>> GetExpensesByFilters(int userId, ExpenseFilterDto filters)
         {
             IQueryable<Expense> query = _entityFramework.Expense.AsQueryable();
 
@@ -26,6 +26,40 @@ namespace PennyPal.Repositories
             if (filters.Year.HasValue)
             {
                 query = query.Where(e => e.Date.Year == filters.Year.Value);
+            }
+
+            if (filters.CategoryId.HasValue)
+            {
+                query = query.Where(e => e.CategoryId == filters.CategoryId.Value);
+            }
+
+            query = query.Where(e => e.UserId == userId);
+
+            return await query.ToListAsync();
+        }
+
+        public async Task<IEnumerable<Expense>> GetExpensesTendances(int userId, ExpenseTendancesFilterDto filters)
+        {
+            IQueryable<Expense> query = _entityFramework.Expense.AsQueryable();
+
+            if (filters.Month1.HasValue)
+            {
+                query = query.Where(e => e.Date.Month == filters.Month1.Value);
+            }
+
+            if (filters.Year1.HasValue)
+            {
+                query = query.Where(e => e.Date.Year == filters.Year1.Value);
+            }
+
+            if (filters.Month2.HasValue)
+            {
+                query = query.Where(e => e.Date.Month == filters.Month2.Value);
+            }
+
+            if (filters.Year2.HasValue)
+            {
+                query = query.Where(e => e.Date.Year == filters.Year2.Value);
             }
 
             if (filters.CategoryId.HasValue)
