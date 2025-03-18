@@ -1,8 +1,11 @@
+using System.Runtime.CompilerServices;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Update.Internal;
 using PennyPal.Dtos;
 using PennyPal.Exceptions;
+using PennyPal.Helpers;
 using PennyPal.Services;
 
 namespace PennyPal.Controllers
@@ -20,36 +23,35 @@ namespace PennyPal.Controllers
         }
 
         [HttpPost("Register")]
-        public async Task Register(UserForRegistrationDto user)
+        public async Task<IActionResult> Register(UserForRegistrationDto user)
         {
             await _authService.Register(user);
+            return Ok();
         }
 
         [HttpPost("Login")]
-        public async Task<Dictionary<string, string>> Login(UserLoginDto user)
+        public async Task<IActionResult> Login(UserLoginDto user)
         {
-            
-            return await _authService.Login(user);
+            Dictionary<string, string> userLogged =  await _authService.Login(user);
+            return Ok(userLogged);
         }
 
+        [Authorize]
         [HttpPut("ChangePassword")]
-        public async Task UpdatePassword(UserLoginDto user)
+        public async Task<IActionResult> UpdatePassword(UserLoginDto user)
         {
-            await _authService.UpdatePassword(user);
+            int userConnectedId = UserHelper.GetUserIdAsInt(User);
+            await _authService.UpdatePassword(user, userConnectedId);
+            return Ok();
         }
-
+        
+        [Authorize]
         [HttpDelete()]
-        public async Task DeleteAccount()
+        public async Task<IActionResult> DeleteAccount()
         {
-            Claim? userIdClaim = User.FindFirst("userId");
-            if (userIdClaim == null || string.IsNullOrEmpty(userIdClaim.Value))
-            {
-                throw new NotFoundException("User Not Found");
-            }
-
-            string userId = userIdClaim.Value;
+            int userId = UserHelper.GetUserIdAsInt(User);
             await _authService.DeleteAccount(userId);
-            
+            return Ok();   
         }
 
     }

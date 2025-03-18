@@ -1,8 +1,11 @@
 using System.Runtime.CompilerServices;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using PennyPal.Data;
 using PennyPal.Dtos;
+using PennyPal.Helpers;
 using PennyPal.Models;
 using PennyPal.Services;
 
@@ -13,50 +16,41 @@ namespace PennyPal.Controllers
 
     public class UserController : ControllerBase
     {
-        private readonly DataContextDapper _dapper;
+
         private readonly IUserService _userService;
 
-        public UserController(IConfiguration config, IUserService userService)
+        public UserController( IUserService userService)
         {
-            _dapper = new DataContextDapper(config);
             _userService = userService;
         }
 
-
-        [HttpGet("TestConnection")]
-        public DateTime TestConnection()
-        {
-            return _dapper.LoadDataSingle<DateTime>("SELECT GETDATE()");
-        }
-
+        [Authorize]
         [HttpGet("Users")]
-        public async Task<IEnumerable<User>> GetUsers()
+        public async Task<IActionResult> GetUsers()
         {
-            return await _userService.GetUsers();
+            int userId = UserHelper.GetUserIdAsInt(User);
+            IEnumerable<User> users =  await _userService.GetUsers(userId);
+            return Ok(users);
         }
 
+        [Authorize]
         [HttpGet("{id}")]
-        public async Task<User?> GetUserById(int id)
+        public async Task<IActionResult> GetUserById(int id)
         {
-            return await _userService.GetUserById(id);
+            int userConnectedId = UserHelper.GetUserIdAsInt(User);
+            User? user = await _userService.GetUserById(id, userConnectedId);
+            return Ok(user);
         }
 
-        [HttpPost()]
-        public async Task AddUser(UserDto userDto)
-        {
-            await _userService.AddUser(userDto);
-        }
+        [Authorize]
         [HttpPut()]
-        public async Task UpdateUser(UserUpdateDto user)
+        public async Task<IActionResult> UpdateUser(UserUpdateDto user)
         {
-            await _userService.UpdateUser(user);
+            int userId = UserHelper.GetUserIdAsInt(User);
+            await _userService.UpdateUser(user, userId);
+            return Ok();
         }
 
-        [HttpDelete("{id}")]
-        public async Task DeleteUser(int id)
-        {
-            await _userService.DeleteUser(id);
-        }
     }
 
 }

@@ -6,8 +6,8 @@ namespace PennyPal.Services
     {
         Task Register(UserForRegistrationDto user);
         Task<Dictionary<string, string>> Login(UserLoginDto user);
-        Task UpdatePassword(UserLoginDto user);
-        Task DeleteAccount(string userId);
+        Task UpdatePassword(UserLoginDto user, int userId);
+        Task DeleteAccount(int userId);
 
     }
 }

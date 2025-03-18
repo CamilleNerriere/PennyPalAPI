@@ -1,7 +1,7 @@
 using PennyPal.Dtos;
 using PennyPal.Models;
 
-namespace PennyPal.Repositories
+namespace PennyPal.Data.Repositories
 {
     public interface IExpenseRepository 
     {

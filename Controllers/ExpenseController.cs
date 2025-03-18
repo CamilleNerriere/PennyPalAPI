@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Mvc;
 using PennyPal.Dtos;
 using PennyPal.Exceptions;
+using PennyPal.Helpers;
 using PennyPal.Models;
 using PennyPal.Services;
 
@@ -24,13 +25,7 @@ namespace PennyPal.Controllers
         [HttpGet()]
         public async Task<IActionResult> GetExpensesByFilters([FromQuery] ExpenseFilterDto filters)
         {
-            Claim? userIdClaim = User.FindFirst("userId");
-            if (userIdClaim == null || string.IsNullOrEmpty(userIdClaim.Value))
-            {
-                throw new NotFoundException("User Not Found");
-            }
-
-            int userId = Int32.Parse(userIdClaim.Value);
+            int userId = UserHelper.GetUserIdAsInt(User);
 
             IEnumerable<Expense> expenses = await _expenseService.GetExpensesByFilters(userId, filters);
 
@@ -41,13 +36,7 @@ namespace PennyPal.Controllers
         [HttpGet("Tendances")]
         public async Task<IActionResult> GetExpensesTendances([FromQuery] ExpenseTendancesFilterDto filters)
         {
-            Claim? userIdClaim = User.FindFirst("userId");
-            if (userIdClaim == null || string.IsNullOrEmpty(userIdClaim.Value))
-            {
-                throw new NotFoundException("User Not Found");
-            }
-
-            int userId = Int32.Parse(userIdClaim.Value);
+            int userId = UserHelper.GetUserIdAsInt(User);
 
             decimal expenses = await _expenseService.GetExpensesTendances(userId, filters);
 
@@ -57,13 +46,7 @@ namespace PennyPal.Controllers
         [HttpPost("Add")]
         public async Task<IActionResult> AddExpense(ExpenseToAddDto expense)
         {
-            Claim? userIdClaim = User.FindFirst("userId");
-            if (userIdClaim == null || string.IsNullOrEmpty(userIdClaim.Value))
-            {
-                throw new NotFoundException("User Not Found");
-            }
-
-            int userId = Int32.Parse(userIdClaim.Value);
+            int userId = UserHelper.GetUserIdAsInt(User);
 
             expense.UserId = userId;
 
@@ -76,13 +59,7 @@ namespace PennyPal.Controllers
         [HttpPut("Update")]
         public async Task<IActionResult> UpdateExpense(ExpenseToUpdateDto expense)
         {
-            Claim? userIdClaim = User.FindFirst("userId");
-            if (userIdClaim == null || string.IsNullOrEmpty(userIdClaim.Value))
-            {
-                throw new NotFoundException("User Not Found");
-            }
-
-            int userId = Int32.Parse(userIdClaim.Value);
+            int userId = UserHelper.GetUserIdAsInt(User);
 
             await _expenseService.UpdateExpense(expense, userId);
 
@@ -93,13 +70,7 @@ namespace PennyPal.Controllers
         [HttpDelete("Delete/{expenseId}")]
         public async Task<IActionResult> DeleteExpense(int expenseId)
         {
-            Claim? userIdClaim = User.FindFirst("userId");
-            if (userIdClaim == null || string.IsNullOrEmpty(userIdClaim.Value))
-            {
-                throw new NotFoundException("User Not Found");
-            }
-
-            int userId = Int32.Parse(userIdClaim.Value);
+            int userId = UserHelper.GetUserIdAsInt(User);
 
             await _expenseService.DeleteExpense(expenseId, userId);
 
