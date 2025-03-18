@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PennyPal.Dtos;
 using PennyPal.Exceptions;
+using PennyPal.Helpers;
 using PennyPal.Models;
 using PennyPal.Services;
 
@@ -26,15 +27,7 @@ namespace PennyPal.Controllers
         [Authorize]
         public async Task<IActionResult> GetUserExpenseCategories()
         {
-            Claim? userIdClaim = User.FindFirst("userId");
-            if (userIdClaim == null || string.IsNullOrEmpty(userIdClaim.Value))
-            {
-                _logger.LogWarning("UserId claim not found");
-                return NotFound("User Not Found");
-
-            }
-
-            int userId = Int32.Parse(userIdClaim.Value);
+            int userId = UserHelper.GetUserIdAsInt(User);
 
             List<ExpenseCategory> categories = await _expenseCategoryService.GetUserExpenseCategories(userId);
             _logger.LogInformation("Retrieved {count} categories for user {userId}", categories.Count, userId);
@@ -46,15 +39,7 @@ namespace PennyPal.Controllers
         [Authorize]
         public async Task<IActionResult> GetExpenseCategoryById(int expenseCategoryId)
         {
-            Claim? userIdClaim = User.FindFirst("userId");
-            if (userIdClaim == null || string.IsNullOrEmpty(userIdClaim.Value))
-            {
-                _logger.LogWarning("UserId claim not found");
-                return NotFound("User Not Found");
-
-            }
-
-            int userId = Int32.Parse(userIdClaim.Value);
+            int userId = UserHelper.GetUserIdAsInt(User);
 
             ExpenseCategory? category = await _expenseCategoryService.GetExpenseCategoryById(expenseCategoryId, userId);
             if (category == null)
@@ -68,15 +53,7 @@ namespace PennyPal.Controllers
         [Authorize]
         public async Task<IActionResult> AddExpenseCategory(ExpenseCategoryForRegistrationDto expenseCategory)
         {
-            Claim? userIdClaim = User.FindFirst("userId");
-            if (userIdClaim == null || string.IsNullOrEmpty(userIdClaim.Value))
-            {
-                _logger.LogWarning("UserId claim not found");
-                return NotFound("User Not Found");
-
-            }
-
-            int userId = Int32.Parse(userIdClaim.Value);
+            int userId = UserHelper.GetUserIdAsInt(User);
 
             expenseCategory.UserId = userId;
 
@@ -89,15 +66,7 @@ namespace PennyPal.Controllers
         [Authorize]
         public async Task<IActionResult> UpdateExpenseCategory(ExpenseCategoryForUpdateDto expenseCategory)
         {
-            Claim? userIdClaim = User.FindFirst("userId");
-            if (userIdClaim == null || string.IsNullOrEmpty(userIdClaim.Value))
-            {
-                _logger.LogWarning("UserId claim not found");
-                return NotFound("User Not Found");
-
-            }
-
-            int userId = Int32.Parse(userIdClaim.Value);
+            int userId = UserHelper.GetUserIdAsInt(User);
 
             expenseCategory.UserId = userId;
 
@@ -110,15 +79,7 @@ namespace PennyPal.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteExpenseCategory(int categoryId)
         {
-            Claim? userIdClaim = User.FindFirst("userId");
-            if (userIdClaim == null || string.IsNullOrEmpty(userIdClaim.Value))
-            {
-                _logger.LogWarning("UserId claim not found");
-                return NotFound("User Not Found");
-
-            }
-
-            int userId = Int32.Parse(userIdClaim.Value);
+            int userId = UserHelper.GetUserIdAsInt(User);
 
             await _expenseCategoryService.DeleteExpenseCategory(categoryId, userId);
 

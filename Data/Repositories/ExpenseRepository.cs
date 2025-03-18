@@ -3,8 +3,9 @@ using PennyPal.Data;
 using PennyPal.Dtos;
 using PennyPal.Exceptions;
 using PennyPal.Models;
+using PennyPal.Data.Repositories;
 
-namespace PennyPal.Repositories
+namespace PennyPal.Data.Repositories
 {
     public class ExpenseRepository : IExpenseRepository
     {

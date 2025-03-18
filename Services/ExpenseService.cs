@@ -1,9 +1,10 @@
 using System.Reflection.Metadata.Ecma335;
 using AutoMapper;
+using PennyPal.Data.Repositories;
 using PennyPal.Dtos;
 using PennyPal.Exceptions;
 using PennyPal.Models;
-using PennyPal.Repositories;
+
 
 namespace PennyPal.Services
 {

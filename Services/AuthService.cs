@@ -129,11 +129,18 @@ namespace PennyPal.Services
 
         }
 
-        public async Task UpdatePassword(UserLoginDto userToUpdate)
+        public async Task UpdatePassword(UserLoginDto userToUpdate, int userId)
         {
             if (userToUpdate == null)
             {
                 throw new CustomValidationException("Missing credentials");
+            }
+
+            User userConnected = await _userRepository.GetUserById(userId) ?? throw new NotFoundException("User not found");
+            
+            if(userToUpdate.Email != userConnected.Email)
+            {
+                throw new Unauthorized(401, "Unauthorized Operation");
             }
 
             byte[] passwordSalt = new byte[128 / 8];
@@ -155,10 +162,9 @@ namespace PennyPal.Services
 
         }
 
-        public async Task DeleteAccount(string userId)
+        public async Task DeleteAccount(int userId)
         {
-            int userIdInt = Int32.Parse(userId);
-            await _userRepository.DeleteUser(userIdInt);
+            await _userRepository.DeleteUser(userId);
             await _userRepository.SaveChangesAsync();
             
         }

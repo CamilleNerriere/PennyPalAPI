@@ -9,49 +9,53 @@ namespace PennyPal.Services
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
+        private readonly IAuthRepository _authRepository;
         private readonly IMapper _mapper;
 
-        public UserService(IUserRepository userRepository)
+        public UserService(IUserRepository userRepository, IAuthRepository authRepository)
         {
             _userRepository = userRepository;
+            _authRepository = authRepository;
             _mapper = new Mapper(new MapperConfiguration(cfg =>
             {
                 cfg.CreateMap<UserDto, User>();
             }));
         }
 
-        public async Task<IEnumerable<User>> GetUsers()
+        public async Task<IEnumerable<User>> GetUsers(int userId)
         {
-            return await _userRepository.GetUsers();
-            
-        }
+            User user = await _userRepository.GetUserById(userId) ?? throw new NotFoundException("User Not Found");
 
-        public async Task<User?> GetUserById(int userId)
-        {
-            return await _userRepository.GetUserById(userId);
-        }
+            Auth auth = await _authRepository.GetAuthByEmail(user.Email) ?? throw new NotFoundException("Auth not found");
 
-        public async Task AddUser(UserDto userDto)
-        {
-            User? existingUser = await _userRepository.GetUserByEmail(userDto);
-            if (existingUser != null)
+            if (auth.Role != "admin")
             {
-                throw new CustomValidationException("This email is already in use.");
+                throw new Unauthorized(401, "Unauthorized Operation");
+            }
+            return await _userRepository.GetUsers();
+
+        }
+
+        public async Task<User?> GetUserById(int userId, int userConnectedId)
+        {
+            User user = await _userRepository.GetUserById(userId) ?? throw new NotFoundException("User not found");
+
+            if (user.Id != userConnectedId)
+            {
+                throw new Unauthorized(401, "Unauthorized Operation");
             }
 
-            User user = _mapper.Map<User>(userDto);
-
-            await _userRepository.AddUser(user);
+            return user;
         }
 
-        public async Task UpdateUser(UserUpdateDto user)
+        public async Task UpdateUser(UserUpdateDto user, int userConnectedId)
         {
+            if(user.Id != userConnectedId)
+            {
+                throw new Unauthorized(401, "Unauthorized Operation");
+            }
             await _userRepository.UpdateUser(user);
         }
 
-        public async Task DeleteUser(int userId)
-        {
-            await _userRepository.DeleteUser(userId);
-        }
     }
 }
