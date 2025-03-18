@@ -40,6 +40,23 @@ namespace PennyPal.Filters
                 });
 
             }
+            else if (ex is Unauthorized unauthorizedEx)
+            {
+                _logger.LogWarning(ex, "Unauthorized access");
+                context.Result = new ObjectResult(new
+                {
+                    StatusCode = unauthorizedEx.StatusCode,
+                    Message = unauthorizedEx.Message
+                })
+                {
+                    StatusCode = unauthorizedEx.StatusCode
+                };
+            }
+            else
+            {
+                _logger.LogError(ex, "Unhandled exception");
+                return Task.CompletedTask;
+            }
             context.ExceptionHandled = true;
             return Task.CompletedTask;
         }

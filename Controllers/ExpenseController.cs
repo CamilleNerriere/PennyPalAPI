@@ -53,5 +53,57 @@ namespace PennyPal.Controllers
 
             return Ok(expenses);
         }
+        [Authorize]
+        [HttpPost("Add")]
+        public async Task<IActionResult> AddExpense(ExpenseToAddDto expense)
+        {
+            Claim? userIdClaim = User.FindFirst("userId");
+            if (userIdClaim == null || string.IsNullOrEmpty(userIdClaim.Value))
+            {
+                throw new NotFoundException("User Not Found");
+            }
+
+            int userId = Int32.Parse(userIdClaim.Value);
+
+            expense.UserId = userId;
+
+            await _expenseService.AddExpense(expense);
+
+            return Ok();
+        }
+
+        [Authorize]
+        [HttpPut("Update")]
+        public async Task<IActionResult> UpdateExpense(ExpenseToUpdateDto expense)
+        {
+            Claim? userIdClaim = User.FindFirst("userId");
+            if (userIdClaim == null || string.IsNullOrEmpty(userIdClaim.Value))
+            {
+                throw new NotFoundException("User Not Found");
+            }
+
+            int userId = Int32.Parse(userIdClaim.Value);
+
+            await _expenseService.UpdateExpense(expense, userId);
+
+            return Ok();
+        }
+
+        [Authorize]
+        [HttpDelete("Delete/{expenseId}")]
+        public async Task<IActionResult> DeleteExpense(int expenseId)
+        {
+            Claim? userIdClaim = User.FindFirst("userId");
+            if (userIdClaim == null || string.IsNullOrEmpty(userIdClaim.Value))
+            {
+                throw new NotFoundException("User Not Found");
+            }
+
+            int userId = Int32.Parse(userIdClaim.Value);
+
+            await _expenseService.DeleteExpense(expenseId, userId);
+
+            return Ok();
+        }
     }
 }
