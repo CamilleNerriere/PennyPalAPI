@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using PennyPal.Data;
 using PennyPal.Dtos;
+using PennyPal.Exceptions;
 using PennyPal.Models;
 
 namespace PennyPal.Repositories
@@ -14,6 +15,13 @@ namespace PennyPal.Repositories
             _entityFramework = entityFramework;
         }
 
+        public async Task<Expense> GetExpenseById(int expenseId)
+        {
+            Expense expense = await _entityFramework.Expense.FindAsync(expenseId) 
+                ?? throw new NotFoundException("Expense not found");
+
+            return expense;
+        }
         public async Task<IEnumerable<Expense>> GetExpensesByFilters(int userId, ExpenseFilterDto filters)
         {
             IQueryable<Expense> query = _entityFramework.Expense.AsQueryable();
@@ -70,6 +78,32 @@ namespace PennyPal.Repositories
             query = query.Where(e => e.UserId == userId);
 
             return await query.ToListAsync();
+        }
+
+        public async Task AddExpense(Expense expense)
+        {
+            await _entityFramework.Expense.AddAsync(expense);
+            await _entityFramework.SaveChangesAsync();
+        }
+
+        public async Task UpdateExpense(Expense expense)
+        {
+            Expense expenseToUpdate = await _entityFramework.Expense.FindAsync(expense.Id)
+                ?? throw new NotFoundException("Expense not found");
+
+            expenseToUpdate.Amount = expense.Amount != 0 ? expense.Amount : expenseToUpdate.Amount;
+            expenseToUpdate.CategoryId = expense.CategoryId != expenseToUpdate.CategoryId ?
+                expense.CategoryId : expenseToUpdate.CategoryId;
+            expenseToUpdate.Date = expense.Date != expenseToUpdate.Date ? expense.Date : expenseToUpdate.Date;
+            expenseToUpdate.Name = expense.Name ?? expenseToUpdate.Name;
+            await _entityFramework.SaveChangesAsync();
+        }
+
+        public async Task DeleteExpense(int expenseId)
+        {
+            Expense? expense = await _entityFramework.Expense.FindAsync(expenseId) ?? throw new NotFoundException("Expense not found");
+            _entityFramework.Remove(expense);
+            await _entityFramework.SaveChangesAsync();
         }
     }
 }
