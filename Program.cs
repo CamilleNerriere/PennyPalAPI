@@ -6,7 +6,6 @@ using PennyPal.Data;
 using PennyPal.Data.Repositories;
 using PennyPal.Filters;
 using PennyPal.Middlewares;
-using PennyPal.Repositories;
 using PennyPal.Services;
 
 var builder = WebApplication.CreateBuilder(args);
