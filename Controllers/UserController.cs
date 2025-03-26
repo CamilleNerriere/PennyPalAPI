@@ -2,8 +2,6 @@ using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Migrations.Operations;
-using PennyPal.Data;
 using PennyPal.Dtos;
 using PennyPal.Helpers;
 using PennyPal.Models;
