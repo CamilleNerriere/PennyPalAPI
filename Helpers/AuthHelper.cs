@@ -10,10 +10,12 @@ namespace PennyPal.Helpers
     public class AuthHelper
     {
         private readonly IConfiguration _config;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public AuthHelper(IConfiguration config)
+        public AuthHelper(IConfiguration config, IHttpContextAccessor httpContextAccessor)
         {
             _config = config;
+            _httpContextAccessor = httpContextAccessor;
         }
         public byte[] GetPasswordHash(string password, byte[] passwordSalt)
         {
@@ -62,6 +64,11 @@ namespace PennyPal.Helpers
             using var rng = RandomNumberGenerator.Create();
             rng.GetBytes(randomBytes);
             return Convert.ToBase64String(randomBytes);
+        }
+
+        public string GetClientIp()
+        {
+            return _httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString() ?? "unknown";
         }
     }
 }

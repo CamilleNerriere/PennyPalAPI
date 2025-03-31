@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Update.Internal;
 using PennyPal.Dtos;
@@ -41,32 +42,50 @@ namespace PennyPal.Controllers
                 Expires = refreshExpiry
             });
 
-            return Ok(new {token = accessToken});
+            return Ok(new { token = accessToken });
         }
 
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken()
         {
             var refreshToken = Request.Cookies["refreshToken"];
-            
-            if(string.IsNullOrEmpty(refreshToken))
+
+            if (string.IsNullOrEmpty(refreshToken))
             {
                 throw new Unauthorized(401, "Invalid Token");
             }
 
-            var(newAccessToken, newRefreshToken, refreshExpiry) = await _authService.RefreshToken(refreshToken);
+            var (newAccessToken, newRefreshToken, refreshExpiry) = await _authService.RefreshToken(refreshToken);
 
             Response.Cookies.Append("refreshToken", newRefreshToken, new CookieOptions
             {
-                HttpOnly = true, 
-                Secure= true,
+                HttpOnly = true,
+                Secure = true,
                 SameSite = SameSiteMode.Strict,
                 Expires = refreshExpiry
             }
             );
 
-            return Ok(new {token = newAccessToken});
+            return Ok(new { token = newAccessToken });
         }
+
+        [HttpPost("Logout")]
+        public async Task<IActionResult> Logout()
+        {
+            var refreshToken = HttpContext.Request.Cookies["refreshToken"];
+
+            if (string.IsNullOrEmpty(refreshToken))
+            {
+                return Ok(new { message = "No token to revoke — already logged out." });
+            }
+
+            await _authService.LogOut(refreshToken);
+
+            HttpContext.Response.Cookies.Delete("refreshToken");
+
+            return Ok(new { message = "Logged out successfully" });
+        }
+
 
         [Authorize]
         [HttpPut("ChangePassword")]

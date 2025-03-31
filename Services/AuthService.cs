@@ -29,13 +29,13 @@ namespace PennyPal.Services
         {
             _authRepository = authRepository;
             _userRepository = userRepository;
-            _authHelper = new AuthHelper(config);
             _mapper = new Mapper(new MapperConfiguration(cfg =>
             {
                 cfg.CreateMap<UserLoginDto, UserDto>();
             }));
             _httpContextAccessor = httpContextAccessor;
             _refreshTokenRepository = refreshTokenRepository;
+            _authHelper = new AuthHelper(config, _httpContextAccessor);
         }
 
         public async Task Register(UserForRegistrationDto user)
@@ -129,7 +129,7 @@ namespace PennyPal.Services
 
             var accessToken = _authHelper.CreateToken(userComplete.Id);
             var refreshToken = _authHelper.GenerateRefreshToken();
-            var refreshExpiry = DateTime.UtcNow.AddHours(12);
+            var refreshExpiry = DateTime.UtcNow.AddMinutes(15);
             var sessionDuration = TimeSpan.FromHours(12);
 
             var tokenEntity = new RefreshToken
@@ -137,7 +137,7 @@ namespace PennyPal.Services
                 Token = refreshToken,
                 Expires = refreshExpiry,
                 CreatedAt = DateTime.UtcNow,
-                CreatedByIp = _httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString() ?? "unknown",
+                CreatedByIp = _authHelper.GetClientIp(),
                 Revoked = false,
                 SessionExpiresAt = DateTime.UtcNow.Add(sessionDuration),
                 UserId = userComplete.Id
@@ -149,11 +149,11 @@ namespace PennyPal.Services
 
         }
 
-        public async Task<(string accessToken, string refreshToken, DateTime refreshExpiracy)> RefreshToken(string OldRefreshToken)
+        public async Task<(string accessToken, string refreshToken, DateTime refreshExpiry)> RefreshToken(string OldRefreshToken)
         {
             var token = await _refreshTokenRepository.GetByToken(OldRefreshToken);
 
-            if (token == null || token.Expires < DateTime.UtcNow || token.Revoked)
+            if (token == null || token.Expires < DateTime.UtcNow || token.Revoked || token.SessionExpiresAt < DateTime.UtcNow)
             {
                 throw new Unauthorized(401, "Invalid Token");
             }
@@ -171,7 +171,7 @@ namespace PennyPal.Services
                 Token = newRefreshToken,
                 Expires = refreshExpiry,
                 CreatedAt = DateTime.UtcNow,
-                CreatedByIp = _httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString() ?? "unknown",
+                CreatedByIp = _authHelper.GetClientIp(),
                 UserId = token.UserId,
                 ReplacedByToken = token.Token
             };
@@ -182,6 +182,7 @@ namespace PennyPal.Services
 
             return (accessToken, newRefreshToken, refreshExpiry);
         }
+
 
         public async Task UpdatePassword(UserLoginDto userToUpdate, int userId)
         {
@@ -213,6 +214,17 @@ namespace PennyPal.Services
             };
 
             await _authRepository.UpdateAuth(updatedAuth);
+
+        }
+
+        public async Task LogOut(string refreshToken)
+        {
+
+            var token = await _refreshTokenRepository.GetByToken(refreshToken);
+            if (token != null)
+            {
+                await _refreshTokenRepository.InvalidateToken(token);
+            }
 
         }
 
