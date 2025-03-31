@@ -21,7 +21,11 @@ namespace PennyPal.Services
         private readonly AuthHelper _authHelper;
         private readonly IMapper _mapper;
 
-        public AuthService(IAuthRepository authRepository, IUserRepository userRepository, IConfiguration config)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        private readonly IRefreshTokenRepository _refreshTokenRepository;
+
+        public AuthService(IAuthRepository authRepository, IUserRepository userRepository, IConfiguration config, IHttpContextAccessor httpContextAccessor, IRefreshTokenRepository refreshTokenRepository)
         {
             _authRepository = authRepository;
             _userRepository = userRepository;
@@ -30,6 +34,8 @@ namespace PennyPal.Services
             {
                 cfg.CreateMap<UserLoginDto, UserDto>();
             }));
+            _httpContextAccessor = httpContextAccessor;
+            _refreshTokenRepository = refreshTokenRepository;
         }
 
         public async Task Register(UserForRegistrationDto user)
@@ -59,7 +65,7 @@ namespace PennyPal.Services
                 Email = user.Email,
                 PasswordHash = passwordHash,
                 PasswordSalt = passwordSalt,
-                Role = user.Role
+                Role = "user"
             };
 
             User userToRegister = new()
@@ -98,7 +104,7 @@ namespace PennyPal.Services
 
         }
 
-        public async Task<Dictionary<string, string>> Login(UserLoginDto user)
+        public async Task<(string accessToken, string refreshToken, DateTime refreshExpiry)> Login(UserLoginDto user)
         {
             if (user == null)
             {
@@ -121,12 +127,60 @@ namespace PennyPal.Services
 
             User? userComplete = await _userRepository.GetUserByEmail(UserMapped) ?? throw new NotFoundException("User not found");
 
-            return new Dictionary<string, string>{
-                {
-                    "token", _authHelper.CreateToken(userComplete.Id)
-                }
+            var accessToken = _authHelper.CreateToken(userComplete.Id);
+            var refreshToken = _authHelper.GenerateRefreshToken();
+            var refreshExpiry = DateTime.UtcNow.AddHours(12);
+            var sessionDuration = TimeSpan.FromHours(12);
+
+            var tokenEntity = new RefreshToken
+            {
+                Token = refreshToken,
+                Expires = refreshExpiry,
+                CreatedAt = DateTime.UtcNow,
+                CreatedByIp = _httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString() ?? "unknown",
+                Revoked = false,
+                SessionExpiresAt = DateTime.UtcNow.Add(sessionDuration),
+                UserId = userComplete.Id
             };
 
+            await _refreshTokenRepository.AddToken(tokenEntity);
+
+            return (accessToken, refreshToken, refreshExpiry);
+
+        }
+
+        public async Task<(string accessToken, string refreshToken, DateTime refreshExpiracy)> RefreshToken(string OldRefreshToken)
+        {
+            var token = await _refreshTokenRepository.GetByToken(OldRefreshToken);
+
+            if (token == null || token.Expires < DateTime.UtcNow || token.Revoked)
+            {
+                throw new Unauthorized(401, "Invalid Token");
+            }
+
+            await _refreshTokenRepository.InvalidateToken(token);
+
+            var newRefreshToken = _authHelper.GenerateRefreshToken();
+
+            var now = DateTime.UtcNow;
+            var sessionLimit = token.SessionExpiresAt;
+            var refreshExpiry = now.AddMinutes(15) > sessionLimit ? sessionLimit : now.AddMinutes(15);
+
+            var newToken = new RefreshToken
+            {
+                Token = newRefreshToken,
+                Expires = refreshExpiry,
+                CreatedAt = DateTime.UtcNow,
+                CreatedByIp = _httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString() ?? "unknown",
+                UserId = token.UserId,
+                ReplacedByToken = token.Token
+            };
+
+            await _refreshTokenRepository.AddToken(newToken);
+
+            var accessToken = _authHelper.CreateToken(token.UserId);
+
+            return (accessToken, newRefreshToken, refreshExpiry);
         }
 
         public async Task UpdatePassword(UserLoginDto userToUpdate, int userId)
@@ -137,8 +191,8 @@ namespace PennyPal.Services
             }
 
             User userConnected = await _userRepository.GetUserById(userId) ?? throw new NotFoundException("User not found");
-            
-            if(userToUpdate.Email != userConnected.Email)
+
+            if (userToUpdate.Email != userConnected.Email)
             {
                 throw new Unauthorized(401, "Unauthorized Operation");
             }
@@ -166,7 +220,7 @@ namespace PennyPal.Services
         {
             await _userRepository.DeleteUser(userId);
             await _userRepository.SaveChangesAsync();
-            
+
         }
     }
 }

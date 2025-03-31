@@ -24,7 +24,6 @@ namespace PennyPal.Dtos
         [Required(ErrorMessage = "Confirm Password is required")]
         [Compare("Password", ErrorMessage = "Password and Confirmation Password must match.")]
         public required string ConfirmPassword { get; set; }
-        public string Role { get; set; } = "user";
 
     }
 }

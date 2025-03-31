@@ -46,7 +46,7 @@ namespace PennyPal.Helpers
             {
                 Subject = new ClaimsIdentity(claims),
                 SigningCredentials = credentials,
-                Expires = DateTime.Now.AddHours(3)
+                Expires = DateTime.Now.AddMinutes(15)
             };
 
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
@@ -54,6 +54,14 @@ namespace PennyPal.Helpers
             SecurityToken token = tokenHandler.CreateToken(descriptor);
 
             return tokenHandler.WriteToken(token);
+        }
+
+        public string GenerateRefreshToken()
+        {
+            var randomBytes = new byte[64];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(randomBytes);
+            return Convert.ToBase64String(randomBytes);
         }
     }
 }

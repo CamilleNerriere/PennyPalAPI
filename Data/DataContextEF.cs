@@ -17,6 +17,7 @@ namespace PennyPal.Data
         public virtual DbSet<User> User {get; set;}
         public virtual DbSet<ExpenseCategory> ExpenseCategory {get; set;}
         public virtual DbSet<Expense> Expense {get; set;}
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -35,6 +36,7 @@ namespace PennyPal.Data
             modelBuilder.ApplyConfiguration(new AuthConfiguration());
             modelBuilder.ApplyConfiguration(new ExpenseCategoryConfiguration());
             modelBuilder.ApplyConfiguration(new ExpenseConfiguration());
+            modelBuilder.ApplyConfiguration(new RefreshTokenConfiguration());
             
             base.OnModelCreating(modelBuilder);
         }

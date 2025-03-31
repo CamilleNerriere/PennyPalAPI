@@ -9,7 +9,7 @@ namespace PennyPal.Data.Configurations
         public void Configure(EntityTypeBuilder<ExpenseCategory> builder)
         {
             builder.ToTable("expense_categories")
-            .HasKey(u => u.Id);
+            .HasKey(e => e.Id);
 
             builder.Property(e => e.Id).HasColumnName("id");
             builder.Property(e => e.UserId).HasColumnName("user_id").IsRequired();

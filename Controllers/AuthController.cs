@@ -30,10 +30,42 @@ namespace PennyPal.Controllers
         }
 
         [HttpPost("Login")]
-        public async Task<IActionResult> Login(UserLoginDto user)
+        public async Task<IActionResult> Login([FromBody] UserLoginDto user)
         {
-            Dictionary<string, string> userLogged =  await _authService.Login(user);
-            return Ok(userLogged);
+            var (accessToken, refreshToken, refreshExpiry) = await _authService.Login(user);
+            HttpContext.Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = refreshExpiry
+            });
+
+            return Ok(new {token = accessToken});
+        }
+
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken()
+        {
+            var refreshToken = Request.Cookies["refreshToken"];
+            
+            if(string.IsNullOrEmpty(refreshToken))
+            {
+                throw new Unauthorized(401, "Invalid Token");
+            }
+
+            var(newAccessToken, newRefreshToken, refreshExpiry) = await _authService.RefreshToken(refreshToken);
+
+            Response.Cookies.Append("refreshToken", newRefreshToken, new CookieOptions
+            {
+                HttpOnly = true, 
+                Secure= true,
+                SameSite = SameSiteMode.Strict,
+                Expires = refreshExpiry
+            }
+            );
+
+            return Ok(new {token = newAccessToken});
         }
 
         [Authorize]
@@ -44,14 +76,14 @@ namespace PennyPal.Controllers
             await _authService.UpdatePassword(user, userConnectedId);
             return Ok();
         }
-        
+
         [Authorize]
         [HttpDelete()]
         public async Task<IActionResult> DeleteAccount()
         {
             int userId = UserHelper.GetUserIdAsInt(User);
             await _authService.DeleteAccount(userId);
-            return Ok();   
+            return Ok();
         }
 
     }
