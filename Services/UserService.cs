@@ -2,6 +2,7 @@ using AutoMapper;
 using PennyPal.Data.Repositories;
 using PennyPal.Dtos;
 using PennyPal.Exceptions;
+using PennyPal.Helpers;
 using PennyPal.Models;
 
 namespace PennyPal.Services
@@ -10,12 +11,16 @@ namespace PennyPal.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly IAuthRepository _authRepository;
+        private readonly IExpenseService _expenseService;
+        private readonly IExpenseCategoryService _expenseCategoryService;
         private readonly IMapper _mapper;
 
-        public UserService(IUserRepository userRepository, IAuthRepository authRepository)
+        public UserService(IUserRepository userRepository, IAuthRepository authRepository, IExpenseCategoryService expenseCategoryService, IExpenseService expenseService)
         {
             _userRepository = userRepository;
             _authRepository = authRepository;
+            _expenseCategoryService = expenseCategoryService;
+            _expenseService = expenseService;
             _mapper = new Mapper(new MapperConfiguration(cfg =>
             {
                 cfg.CreateMap<UserDto, User>();
@@ -55,6 +60,30 @@ namespace PennyPal.Services
                 throw new Unauthorized(401, "Unauthorized Operation");
             }
             await _userRepository.UpdateUser(user);
+        }
+
+        public async Task<Decimal> GetUserRemain(int userId)
+        {
+
+            List<ExpenseCategory> categories = await _expenseCategoryService.GetUserExpenseCategories(userId);
+
+            Decimal budget = 0m;
+
+            foreach (var cat in categories)
+            {
+                budget += cat.MonthlyBudget;
+            }
+
+            List<Expense> userExpenses = await _expenseService.GetUserExpense(userId);
+
+            Decimal expenses = 0m;
+
+            foreach (var exp in userExpenses)
+            {
+                expenses += exp.Amount;
+            }
+
+            return budget - expenses;
         }
 
     }

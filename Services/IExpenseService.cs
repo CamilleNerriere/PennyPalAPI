@@ -10,5 +10,6 @@ namespace PennyPal.Services
         Task AddExpense(ExpenseToAddDto expense);
         Task UpdateExpense(ExpenseToUpdateDto expense, int userId);
         Task DeleteExpense(int expenseId, int userId);
+        Task<List<Expense>> GetUserExpense(int userId);
     }
 }

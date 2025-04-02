@@ -73,5 +73,10 @@ namespace PennyPal.Services
             await _expenseRepository.DeleteExpense(expenseId);
         }
 
+        public async Task<List<Expense>> GetUserExpense(int userId)
+        {
+            return await _expenseRepository.GetUserExpense(userId);
+        }
+
     }
 }

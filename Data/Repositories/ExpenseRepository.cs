@@ -13,14 +13,21 @@ namespace PennyPal.Data.Repositories
         {
             _entityFramework = entityFramework;
         }
-
         public async Task<Expense> GetExpenseById(int expenseId)
         {
-            Expense expense = await _entityFramework.Expense.FindAsync(expenseId) 
+            Expense expense = await _entityFramework.Expense.FindAsync(expenseId)
                 ?? throw new NotFoundException("Expense not found");
 
             return expense;
         }
+        public async Task<List<Expense>> GetUserExpense(int userId)
+        {
+            return await _entityFramework.Expense.Where(e => e.UserId == userId)
+        .ToListAsync()
+                ?? throw new NotFoundException("Expense not found");
+
+        }
+
         public async Task<IEnumerable<Expense>> GetExpensesByFilters(int userId, ExpenseFilterDto filters)
         {
             IQueryable<Expense> query = _entityFramework.Expense.AsQueryable();

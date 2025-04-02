@@ -32,6 +32,15 @@ namespace PennyPal.Controllers
         }
 
         [Authorize]
+        [HttpGet("UserRemain")]
+        public async Task<IActionResult> GetUserRemain()
+        {
+            int userId = UserHelper.GetUserIdAsInt(User);
+            var remaim = await _userService.GetUserRemain(userId);
+            return Ok(remaim);
+        }
+
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById(int id)
         {
