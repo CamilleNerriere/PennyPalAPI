@@ -173,7 +173,8 @@ namespace PennyPal.Services
                 CreatedAt = DateTime.UtcNow,
                 CreatedByIp = _authHelper.GetClientIp(),
                 UserId = token.UserId,
-                ReplacedByToken = token.Token
+                ReplacedByToken = token.Token,
+                SessionExpiresAt = token.SessionExpiresAt
             };
 
             await _refreshTokenRepository.AddToken(newToken);

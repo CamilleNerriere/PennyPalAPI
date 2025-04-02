@@ -45,7 +45,7 @@ namespace PennyPal.Controllers
             return Ok(new { token = accessToken });
         }
 
-        [HttpPost("refresh-token")]
+        [HttpPost("RefreshToken")]
         public async Task<IActionResult> RefreshToken()
         {
             var refreshToken = Request.Cookies["refreshToken"];

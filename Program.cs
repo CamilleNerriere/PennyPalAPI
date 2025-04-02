@@ -22,11 +22,13 @@ builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+string? React_URL = builder.Configuration.GetSection("AppSettings:React_URL").Value;
+
 builder.Services.AddCors((options) =>
     {
         options.AddPolicy("DevCors", (corsBuilder) =>
             {
-                corsBuilder.WithOrigins("http://localhost:4200", "http://localhost:3000", "http://localhost:8000")
+                corsBuilder.WithOrigins(React_URL!)
                     .AllowAnyMethod()
                     .AllowAnyHeader()
                     .AllowCredentials();
