@@ -22,11 +22,13 @@ builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+var clientUrl = builder.Configuration.GetSection("AppSettings:ClientUrl").Value;
+
 builder.Services.AddCors((options) =>
     {
         options.AddPolicy("DevCors", (corsBuilder) =>
             {
-                corsBuilder.WithOrigins("http://localhost:4200", "http://localhost:3000", "http://localhost:8000")
+                corsBuilder.WithOrigins(clientUrl!)
                     .AllowAnyMethod()
                     .AllowAnyHeader()
                     .AllowCredentials();

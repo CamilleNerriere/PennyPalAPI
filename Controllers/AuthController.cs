@@ -37,7 +37,7 @@ namespace PennyPal.Controllers
             HttpContext.Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
+                Secure = false,
                 SameSite = SameSiteMode.Strict,
                 Expires = refreshExpiry
             });
@@ -45,7 +45,7 @@ namespace PennyPal.Controllers
             return Ok(new { token = accessToken });
         }
 
-        [HttpPost("refresh-token")]
+        [HttpPost("RefreshToken")]
         public async Task<IActionResult> RefreshToken()
         {
             var refreshToken = Request.Cookies["refreshToken"];
@@ -60,7 +60,7 @@ namespace PennyPal.Controllers
             Response.Cookies.Append("refreshToken", newRefreshToken, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
+                Secure = false,
                 SameSite = SameSiteMode.Strict,
                 Expires = refreshExpiry
             }

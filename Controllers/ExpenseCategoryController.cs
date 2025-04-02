@@ -35,6 +35,25 @@ namespace PennyPal.Controllers
             return Ok(categories);
         }
 
+        [HttpGet("MonthlyBudget")]
+        [Authorize]
+        public async Task<IActionResult> GetUserExpenseMonthlyBudget()
+        {
+            int userId = UserHelper.GetUserIdAsInt(User);
+
+            List<ExpenseCategory> categories = await _expenseCategoryService.GetUserExpenseCategories(userId);
+            _logger.LogInformation("Retrieved {count} categories for user {userId}", categories.Count, userId);
+
+            Decimal budget = 0m; 
+
+            foreach (var cat in categories)
+            {
+                budget += cat.MonthlyBudget;
+            }
+
+            return Ok(budget);
+        }
+
         [HttpGet("{expenseCategoryId}")]
         [Authorize]
         public async Task<IActionResult> GetExpenseCategoryById(int expenseCategoryId)
