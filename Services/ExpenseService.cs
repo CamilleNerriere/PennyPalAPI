@@ -25,10 +25,10 @@ namespace PennyPal.Services
 
         public async Task<IEnumerable<Expense>> GetExpensesByFilters(int userId, ExpenseFilterDto filters)
         {
-            return await _expenseRepository.GetExpensesByFilters(userId, filters); 
+            return await _expenseRepository.GetExpensesByFilters(userId, filters);
         }
 
-        public async Task<decimal> GetExpensesTendances(int userId,ExpenseTendancesFilterDto filters)
+        public async Task<decimal> GetExpensesTendances(int userId, ExpenseTendancesFilterDto filters)
         {
             IEnumerable<Expense> expenses = await _expenseRepository.GetExpensesTendances(userId, filters);
 
@@ -36,13 +36,33 @@ namespace PennyPal.Services
 
             int numberOfExpenses = expenses.Count();
 
+            int GetMonthDifference(DateTime startDate, DateTime endDate)
+            {
+                return ((endDate.Year - startDate.Year) * 12) + endDate.Month - startDate.Month;
+            }
+
+            int nbMonth = 0;
+
+            if (filters.Month1.HasValue && filters.Year1.HasValue && filters.Month2.HasValue && filters.Year2.HasValue)
+            {
+                var startDate = new DateTime(filters.Year1.Value, filters.Month1.Value, 1);
+                var endDate = new DateTime(filters.Year2.Value, filters.Month2.Value, 1).AddMonths(1).AddDays(-1);
+                nbMonth = GetMonthDifference(startDate, endDate) + 1; 
+            }
+
             foreach (Expense expense in expenses)
             {
                 sum += expense.Amount;
             }
-            return Math.Round(sum/numberOfExpenses, 2);
+
+            if (numberOfExpenses != 0 && nbMonth !=0)
+            {
+                return Math.Round(sum / nbMonth, 2);
+            }
+
+            return 0;
         }
-        
+
         public async Task AddExpense(ExpenseToAddDto expense)
         {
             Expense expenseMapped = _mapper.Map<Expense>(expense);
@@ -51,25 +71,25 @@ namespace PennyPal.Services
 
         public async Task UpdateExpense(ExpenseToUpdateDto expense, int userId)
         {
-            if(expense.UserId != userId)
+            if (expense.UserId != userId)
             {
                 throw new Unauthorized(401, "Unauthorized Update");
             }
             Expense expenseMapped = _mapper.Map<Expense>(expense);
-            
+
             await _expenseRepository.UpdateExpense(expenseMapped);
         }
 
         public async Task DeleteExpense(int expenseId, int userId)
         {
-            
+
             Expense expense = await _expenseRepository.GetExpenseById(expenseId);
 
-            if(expense.UserId != userId)
+            if (expense.UserId != userId)
             {
                 throw new Unauthorized(401, "Unauthorized operation");
             }
-            
+
             await _expenseRepository.DeleteExpense(expenseId);
         }
 

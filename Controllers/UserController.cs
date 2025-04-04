@@ -41,11 +41,12 @@ namespace PennyPal.Controllers
         }
 
         [Authorize]
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetUserById(int id)
+        [HttpGet()]
+        public async Task<IActionResult> GetUserById()
         {
+            int userId = UserHelper.GetUserIdAsInt(User);
             int userConnectedId = UserHelper.GetUserIdAsInt(User);
-            User? user = await _userService.GetUserById(id, userConnectedId);
+            User? user = await _userService.GetUserById(userId, userConnectedId);
             return Ok(user);
         }
 

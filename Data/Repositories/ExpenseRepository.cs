@@ -56,35 +56,24 @@ namespace PennyPal.Data.Repositories
         {
             IQueryable<Expense> query = _entityFramework.Expense.AsQueryable();
 
-            if (filters.Month1.HasValue)
-            {
-                query = query.Where(e => e.Date.Month == filters.Month1.Value);
-            }
-
-            if (filters.Year1.HasValue)
-            {
-                query = query.Where(e => e.Date.Year == filters.Year1.Value);
-            }
-
-            if (filters.Month2.HasValue)
-            {
-                query = query.Where(e => e.Date.Month == filters.Month2.Value);
-            }
-
-            if (filters.Year2.HasValue)
-            {
-                query = query.Where(e => e.Date.Year == filters.Year2.Value);
-            }
+            query = query.Where(e => e.UserId == userId);
 
             if (filters.CategoryId.HasValue)
             {
                 query = query.Where(e => e.CategoryId == filters.CategoryId.Value);
             }
 
-            query = query.Where(e => e.UserId == userId);
+            if (filters.Month1.HasValue && filters.Year1.HasValue && filters.Month2.HasValue && filters.Year2.HasValue)
+            {
+                var startDate = new DateTime(filters.Year1.Value, filters.Month1.Value, 1);
+                var endDate = new DateTime(filters.Year2.Value, filters.Month2.Value, 1).AddMonths(1).AddDays(-1); 
+
+                query = query.Where(e => e.Date >= startDate && e.Date <= endDate);
+            }
 
             return await query.ToListAsync();
         }
+
 
         public async Task AddExpense(Expense expense)
         {
