@@ -23,6 +23,18 @@ namespace PennyPal.Services
             }));
         }
 
+        public async Task<Expense> GetExpenseById(int userId, int expenseId)
+        {
+            Expense expense = await _expenseRepository.GetExpenseById(expenseId);
+
+            if(expense.UserId != userId)
+            {
+                throw new Unauthorized(401, "Unauthorized action.");
+            }
+
+            return expense;
+        }
+
         public async Task<IEnumerable<Expense>> GetExpensesByFilters(int userId, ExpenseFilterDto filters)
         {
             return await _expenseRepository.GetExpensesByFilters(userId, filters);
@@ -47,7 +59,7 @@ namespace PennyPal.Services
             {
                 var startDate = new DateTime(filters.Year1.Value, filters.Month1.Value, 1);
                 var endDate = new DateTime(filters.Year2.Value, filters.Month2.Value, 1).AddMonths(1).AddDays(-1);
-                nbMonth = GetMonthDifference(startDate, endDate) + 1; 
+                nbMonth = GetMonthDifference(startDate, endDate) + 1;
             }
 
             foreach (Expense expense in expenses)
@@ -55,7 +67,7 @@ namespace PennyPal.Services
                 sum += expense.Amount;
             }
 
-            if (numberOfExpenses != 0 && nbMonth !=0)
+            if (numberOfExpenses != 0 && nbMonth != 0)
             {
                 return Math.Round(sum / nbMonth, 2);
             }

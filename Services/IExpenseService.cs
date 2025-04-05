@@ -5,6 +5,7 @@ namespace PennyPal.Services
 {
     public interface IExpenseService
     {
+        Task<Expense> GetExpenseById(int userId, int expenseId);
         Task<IEnumerable<Expense>> GetExpensesByFilters(int userId, ExpenseFilterDto filters);
         Task<decimal> GetExpensesTendances(int userId,ExpenseTendancesFilterDto filters);
         Task AddExpense(ExpenseToAddDto expense);

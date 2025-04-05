@@ -35,6 +35,9 @@ namespace PennyPal.Controllers
             return Ok(categories);
         }
 
+        
+
+
         [HttpGet("MonthlyBudget")]
         [Authorize]
         public async Task<IActionResult> GetUserBudget()

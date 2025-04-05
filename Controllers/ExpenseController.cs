@@ -22,6 +22,18 @@ namespace PennyPal.Controllers
         }
 
         [Authorize]
+        [HttpGet("{expenseId}")]
+        public async Task<IActionResult> GetExpenseById( int expenseId)
+        {
+            int userId = UserHelper.GetUserIdAsInt(User);
+
+            Expense expense = await _expenseService.GetExpenseById(userId, expenseId);
+
+            return Ok(expense);
+
+        }
+
+        [Authorize]
         [HttpGet()]
         public async Task<IActionResult> GetExpensesByFilters([FromQuery] ExpenseFilterDto filters)
         {

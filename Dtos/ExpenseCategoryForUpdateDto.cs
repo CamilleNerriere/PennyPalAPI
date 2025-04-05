@@ -4,8 +4,8 @@ namespace PennyPal.Dtos
 {
     public partial class ExpenseCategoryForUpdateDto
     {
-        [Required(ErrorMessage = "You must provide a user")]
-        public required int UserId { get; set; }
+
+        public int UserId { get; set; }
         [Required(ErrorMessage = "You must provide a category")]
         public required int Id { get; set; }
         [Required(ErrorMessage = "Name is required")]
