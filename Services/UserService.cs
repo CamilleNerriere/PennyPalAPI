@@ -78,9 +78,14 @@ namespace PennyPal.Services
 
             Decimal expenses = 0m;
 
+            DateTime date = DateTime.Now;
+
             foreach (var exp in userExpenses)
             {
-                expenses += exp.Amount;
+                if (exp.Date.Month == date.Month)
+                {
+                    expenses += exp.Amount;
+                }
             }
 
             return budget - expenses;
