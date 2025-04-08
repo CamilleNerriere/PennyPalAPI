@@ -75,7 +75,7 @@ namespace PennyPal.Controllers
 
             await _expenseService.UpdateExpense(expense, userId);
 
-            return Ok();
+            return NoContent();
         }
 
         [Authorize]

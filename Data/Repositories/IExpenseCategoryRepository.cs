@@ -10,7 +10,7 @@ namespace PennyPal.Data.Repositories
         // Un domaine par id
         Task<ExpenseCategory?> GetExpenseCategoryById(int expenseCategoryId); 
         // Créer un domaine 
-        Task AddExpenseCategory(ExpenseCategoryForRegistrationDto expenseCategory);
+        Task<ExpenseCategory> AddExpenseCategory(ExpenseCategoryForRegistrationDto expenseCategory);
         // Modifier un domaine 
         Task UpdateExpenseCategory(ExpenseCategoryForUpdateDto expenseCategory);
         // Supprimer un domaine 

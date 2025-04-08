@@ -81,6 +81,13 @@ builder.Services.AddLogging();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 
+// change in prod
+builder.Services.Configure<CookiePolicyOptions>(options =>
+{
+    options.MinimumSameSitePolicy = SameSiteMode.Unspecified;
+    options.Secure = CookieSecurePolicy.None;
+});
+
 var app = builder.Build();
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
@@ -103,6 +110,8 @@ app.UseStaticFiles();
 // app.UseResponseCompression();
 
 app.UseRouting();
+
+app.UseCookiePolicy();
 
 if (app.Environment.IsDevelopment())
 {

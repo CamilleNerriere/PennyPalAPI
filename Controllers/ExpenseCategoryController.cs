@@ -75,9 +75,9 @@ namespace PennyPal.Controllers
 
             expenseCategory.UserId = userId;
 
-            await _expenseCategoryService.AddExpenseCategory(expenseCategory);
+            var category = await _expenseCategoryService.AddExpenseCategory(expenseCategory);
 
-            return Ok();
+            return Ok(category);
         }
 
         [HttpPut()]

@@ -10,7 +10,7 @@ namespace PennyPal.Services
         // Un domaine par id
         Task<ExpenseCategory?> GetExpenseCategoryById(int expenseCategoryId, int userId); 
         // Créer un domaine 
-        Task AddExpenseCategory(ExpenseCategoryForRegistrationDto expenseCategory);
+         Task<ExpenseCategory> AddExpenseCategory(ExpenseCategoryForRegistrationDto expenseCategory);
         // Modifier un domaine 
         Task UpdateExpenseCategory(ExpenseCategoryForUpdateDto expenseCategory, int userId);
         // Supprimer un domaine 

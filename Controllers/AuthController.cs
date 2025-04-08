@@ -37,8 +37,9 @@ namespace PennyPal.Controllers
             HttpContext.Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Strict,
+                // change in prod
+                Secure = false,
+                SameSite = SameSiteMode.Lax,
                 Expires = refreshExpiry
             });
 
@@ -60,8 +61,9 @@ namespace PennyPal.Controllers
             Response.Cookies.Append("refreshToken", newRefreshToken, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Strict,
+                // change in prod
+                Secure = false,
+                SameSite = SameSiteMode.Lax,
                 Expires = refreshExpiry
             }
             );

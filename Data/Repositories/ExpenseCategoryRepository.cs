@@ -30,7 +30,7 @@ namespace PennyPal.Data.Repositories
             return await _entityFramework.ExpenseCategory.FindAsync(expenseCategoryId);
         }
 
-        public async Task AddExpenseCategory(ExpenseCategoryForRegistrationDto expenseCategory)
+        public async Task<ExpenseCategory> AddExpenseCategory(ExpenseCategoryForRegistrationDto expenseCategory)
         {
             if(expenseCategory == null)
             {
@@ -41,6 +41,8 @@ namespace PennyPal.Data.Repositories
 
             await _entityFramework.ExpenseCategory.AddAsync(expenseCategoryMap);
             await _entityFramework.SaveChangesAsync();
+
+            return expenseCategoryMap;
         }
 
         public async Task UpdateExpenseCategory(ExpenseCategoryForUpdateDto expenseCategory)

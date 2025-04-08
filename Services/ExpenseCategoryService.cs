@@ -47,9 +47,9 @@ namespace PennyPal.Services
             return category;
         }
 
-        public async Task AddExpenseCategory(ExpenseCategoryForRegistrationDto expenseCategory)
+        public async Task<ExpenseCategory> AddExpenseCategory(ExpenseCategoryForRegistrationDto expenseCategory)
         {
-            await _expenseCategoryRepository.AddExpenseCategory(expenseCategory);
+            return await _expenseCategoryRepository.AddExpenseCategory(expenseCategory);
         }
 
         public async Task UpdateExpenseCategory(ExpenseCategoryForUpdateDto expenseCategory, int userId)
