@@ -86,7 +86,7 @@ namespace PennyPal.Controllers
 
             await _expenseService.DeleteExpense(expenseId, userId);
 
-            return Ok();
+            return NoContent();
         }
     }
 }

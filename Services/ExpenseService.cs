@@ -83,6 +83,8 @@ namespace PennyPal.Services
 
         public async Task UpdateExpense(ExpenseToUpdateDto expense, int userId)
         {
+            Console.WriteLine($"{expense.UserId}, {userId}");
+            
             if (expense.UserId != userId)
             {
                 throw new Unauthorized(401, "Unauthorized Update");
@@ -101,7 +103,7 @@ namespace PennyPal.Services
             {
                 throw new Unauthorized(401, "Unauthorized operation");
             }
-
+            
             await _expenseRepository.DeleteExpense(expenseId);
         }
 

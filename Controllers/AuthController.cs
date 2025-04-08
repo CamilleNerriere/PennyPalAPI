@@ -89,7 +89,7 @@ namespace PennyPal.Controllers
 
         [Authorize]
         [HttpPut("ChangePassword")]
-        public async Task<IActionResult> UpdatePassword(UserLoginDto user)
+        public async Task<IActionResult> UpdatePassword(UserUpdatePasswordDto user)
         {
             int userConnectedId = UserHelper.GetUserIdAsInt(User);
             await _authService.UpdatePassword(user, userConnectedId);

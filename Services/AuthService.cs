@@ -185,19 +185,19 @@ namespace PennyPal.Services
         }
 
 
-        public async Task UpdatePassword(UserLoginDto userToUpdate, int userId)
+        public async Task UpdatePassword(UserUpdatePasswordDto userToUpdate, int userId)
         {
             if (userToUpdate == null)
             {
                 throw new CustomValidationException("Missing credentials");
             }
 
-            User userConnected = await _userRepository.GetUserById(userId) ?? throw new NotFoundException("User not found");
-
-            if (userToUpdate.Email != userConnected.Email)
+            if(userToUpdate.Password != userToUpdate.ConfirmPassword)
             {
-                throw new Unauthorized(401, "Unauthorized Operation");
+                throw new Exception("Password and Confirm Password must match");
             }
+
+            User userConnected = await _userRepository.GetUserById(userId) ?? throw new NotFoundException("User not found");
 
             byte[] passwordSalt = new byte[128 / 8];
             using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
@@ -209,7 +209,7 @@ namespace PennyPal.Services
 
             Auth updatedAuth = new()
             {
-                Email = userToUpdate.Email,
+                Email = userConnected.Email,
                 PasswordHash = passwordHash,
                 PasswordSalt = passwordSalt,
             };

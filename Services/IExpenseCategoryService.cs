@@ -6,7 +6,7 @@ namespace PennyPal.Services
     public interface IExpenseCategoryService
     {
         // Tous les domaines d'un utilisateur
-        Task<List<ExpenseCategory>> GetUserExpenseCategories(int userId);
+        Task<IEnumerable<ExpenseCategoryDto>> GetUserExpenseCategories(int userId);
         // Un domaine par id
         Task<ExpenseCategory?> GetExpenseCategoryById(int expenseCategoryId, int userId); 
         // Créer un domaine 

@@ -22,7 +22,7 @@ namespace PennyPal.Data.Repositories
 
         public async Task<List<ExpenseCategory>> GetUserExpenseCategories(int userId)
         {
-            return await _entityFramework.ExpenseCategory.Where(e => e.UserId == userId).ToListAsync();
+            return await _entityFramework.ExpenseCategory.Where(e => e.UserId == userId).Include(e => e.Expenses).ToListAsync();
         }
 
         public async Task<ExpenseCategory?> GetExpenseCategoryById(int expenseCategoryId)

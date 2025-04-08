@@ -14,9 +14,24 @@ namespace PennyPal.Services
             _expenseCategoryRepository = expenseCategoryRepository;
         }
 
-        public async Task<List<ExpenseCategory>> GetUserExpenseCategories(int userId)
+        public async Task<IEnumerable<ExpenseCategoryDto>> GetUserExpenseCategories(int userId)
         {
-            return await _expenseCategoryRepository.GetUserExpenseCategories(userId);
+            var categories=  await _expenseCategoryRepository.GetUserExpenseCategories(userId);
+
+            var result = categories.Select(c => new ExpenseCategoryDto 
+            {
+                Id = c.Id,
+                Name = c.Name,
+                MonthlyBudget = c.MonthlyBudget,
+                Expenses = c.Expenses.Select(exp => new ExpenseDto{
+                    Id = exp.Id,
+                    Name = exp.Name ?? "",
+                    Amount = exp.Amount, 
+                    Date = exp.Date
+                }).ToList()
+            });
+
+            return result;
         }
 
         public async Task<ExpenseCategory?> GetExpenseCategoryById(int expenseCategoryId, int userId)

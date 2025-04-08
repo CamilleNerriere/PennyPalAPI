@@ -29,13 +29,10 @@ namespace PennyPal.Controllers
         {
             int userId = UserHelper.GetUserIdAsInt(User);
 
-            List<ExpenseCategory> categories = await _expenseCategoryService.GetUserExpenseCategories(userId);
-            _logger.LogInformation("Retrieved {count} categories for user {userId}", categories.Count, userId);
-
+            IEnumerable<ExpenseCategoryDto> categories = await _expenseCategoryService.GetUserExpenseCategories(userId);
+   
             return Ok(categories);
         }
-
-        
 
 
         [HttpGet("MonthlyBudget")]
@@ -44,10 +41,9 @@ namespace PennyPal.Controllers
         {
             int userId = UserHelper.GetUserIdAsInt(User);
 
-            List<ExpenseCategory> categories = await _expenseCategoryService.GetUserExpenseCategories(userId);
-            _logger.LogInformation("Retrieved {count} categories for user {userId}", categories.Count, userId);
+            IEnumerable<ExpenseCategoryDto> categories = await _expenseCategoryService.GetUserExpenseCategories(userId);
 
-            Decimal budget = 0m;
+            decimal budget = 0m;
 
             foreach (var cat in categories)
             {

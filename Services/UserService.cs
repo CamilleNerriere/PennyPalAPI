@@ -65,7 +65,7 @@ namespace PennyPal.Services
         public async Task<Decimal> GetUserRemain(int userId)
         {
 
-            List<ExpenseCategory> categories = await _expenseCategoryService.GetUserExpenseCategories(userId);
+            IEnumerable<ExpenseCategoryDto> categories = await _expenseCategoryService.GetUserExpenseCategories(userId);
 
             Decimal budget = 0m;
 
@@ -89,6 +89,40 @@ namespace PennyPal.Services
             }
 
             return budget - expenses;
+        }
+
+        public async Task<IEnumerable<ExpenseCategoryRemainDto>> GetUserCategoryRemain(int userId)
+        {
+            IEnumerable<ExpenseCategoryDto> categories = await _expenseCategoryService.GetUserExpenseCategories(userId);
+
+            List<ExpenseCategoryRemainDto> categoryRemains = []; 
+
+            DateTime date = DateTime.Now;
+
+            foreach (var cat in categories)
+            {
+                decimal budget = cat.MonthlyBudget;
+
+                foreach (var exp in cat.Expenses)
+                {
+                    if(exp.Date.Month == date.Month)
+                    {
+                        budget -= exp.Amount;
+                    }
+                }
+
+                ExpenseCategoryRemainDto category = new()
+                {
+                    Id = cat.Id,
+                    Name = cat.Name,
+                    MonthlyBudget = cat.MonthlyBudget,
+                    Remain = budget
+                }; 
+
+                categoryRemains.Add(category);
+            }
+
+            return categoryRemains;
         }
 
     }
