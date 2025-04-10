@@ -16,10 +16,10 @@ namespace PennyPal.Services
         private readonly AuthHelper _authHelper;
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
-
         private readonly IRefreshTokenRepository _refreshTokenRepository;
+        private readonly ILogger<AuthService> _logger;
 
-        public AuthService(IAuthRepository authRepository, IUserRepository userRepository, IConfiguration config, IHttpContextAccessor httpContextAccessor, IRefreshTokenRepository refreshTokenRepository)
+        public AuthService(ILogger<AuthService> logger, IAuthRepository authRepository, IUserRepository userRepository, IConfiguration config, IHttpContextAccessor httpContextAccessor, IRefreshTokenRepository refreshTokenRepository)
         {
             _authRepository = authRepository;
             _userRepository = userRepository;
@@ -30,6 +30,7 @@ namespace PennyPal.Services
             _httpContextAccessor = httpContextAccessor;
             _refreshTokenRepository = refreshTokenRepository;
             _authHelper = new AuthHelper(config, _httpContextAccessor);
+            _logger = logger;
         }
 
         public async Task Register(UserForRegistrationDto user)
@@ -70,7 +71,9 @@ namespace PennyPal.Services
 
             IExecutionStrategy strategy = _authRepository.GetExecutionStrategy();
 
-            await strategy.ExecuteAsync(
+
+
+            _ = await strategy.ExecuteAsync(
                 state: (authToRegister, userToRegister),
                 operation: async (dbContext, state, cancellationToken) =>
                 {
@@ -84,11 +87,13 @@ namespace PennyPal.Services
                         await _authRepository.SaveChangesAsync(cancellationToken);
                         await transaction.CommitAsync(cancellationToken);
 
+                        _logger.LogInformation("New User successfully added, with {Email}", state.userToRegister.Email);
                         return true;
                     }
                     catch (Exception)
                     {
                         await transaction.RollbackAsync(cancellationToken);
+                        _logger.LogError("Error during registration with email {Email}", state.userToRegister.Email);
                         throw new Exception("Unable to register user");
                     }
                 },
@@ -148,6 +153,7 @@ namespace PennyPal.Services
 
             if (token == null || token.Expires < DateTime.UtcNow || token.Revoked || token.SessionExpiresAt < DateTime.UtcNow)
             {
+                _logger.LogWarning("Invalid refresh token attempt (partial): {TokenPrefix}...", OldRefreshToken[..10]);
                 throw new Unauthorized(401, "Invalid Token");
             }
 
@@ -185,7 +191,7 @@ namespace PennyPal.Services
                 throw new CustomValidationException("Missing credentials");
             }
 
-            if(userToUpdate.Password != userToUpdate.ConfirmPassword)
+            if (userToUpdate.Password != userToUpdate.ConfirmPassword)
             {
                 throw new Exception("Password and Confirm Password must match");
             }

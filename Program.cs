@@ -7,6 +7,7 @@ using PennyPal.Data.Repositories;
 using PennyPal.Filters;
 using PennyPal.Middlewares;
 using PennyPal.Services;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -77,9 +78,15 @@ builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddHttpContextAccessor();
 
 
-builder.Services.AddLogging();
-builder.Logging.AddConsole();
-builder.Logging.AddDebug();
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File("logs/pennypal-.log", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+
+builder.Logging.ClearProviders();
+builder.Host.UseSerilog();
 
 // change in prod
 builder.Services.Configure<CookiePolicyOptions>(options =>
@@ -105,8 +112,6 @@ else
     app.UseHttpsRedirection();
 
 }
-
-app.UseStaticFiles();
 
 app.UseRouting();
 

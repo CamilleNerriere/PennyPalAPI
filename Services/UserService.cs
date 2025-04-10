@@ -12,18 +12,15 @@ namespace PennyPal.Services
         private readonly IAuthRepository _authRepository;
         private readonly IExpenseService _expenseService;
         private readonly IExpenseCategoryService _expenseCategoryService;
-        private readonly IMapper _mapper;
+        private readonly ILogger<UserService> _logger;
 
-        public UserService(IUserRepository userRepository, IAuthRepository authRepository, IExpenseCategoryService expenseCategoryService, IExpenseService expenseService)
+        public UserService(IUserRepository userRepository, IAuthRepository authRepository, IExpenseCategoryService expenseCategoryService, IExpenseService expenseService, ILogger<UserService> logger)
         {
             _userRepository = userRepository;
             _authRepository = authRepository;
             _expenseCategoryService = expenseCategoryService;
             _expenseService = expenseService;
-            _mapper = new Mapper(new MapperConfiguration(cfg =>
-            {
-                cfg.CreateMap<UserDto, User>();
-            }));
+            _logger = logger;
         }
 
         public async Task<User?> GetUserById(int userId, int userConnectedId)
@@ -32,6 +29,7 @@ namespace PennyPal.Services
 
             if (user.Id != userConnectedId)
             {
+                _logger.LogError("Unauthorized attempt to get user {userId} informations by user {userConnectedId}", userId, userConnectedId);
                 throw new Unauthorized(401, "Unauthorized Operation");
             }
 
@@ -40,8 +38,10 @@ namespace PennyPal.Services
 
         public async Task UpdateUser(UserUpdateDto user, int userConnectedId)
         {
-            if(user.Id != userConnectedId)
+            if (user.Id != userConnectedId)
             {
+                _logger.LogError("Unauthorized attempt to update user {userId} informations by user {userConnectedId}", user.Id, userConnectedId);
+
                 throw new Unauthorized(401, "Unauthorized Operation");
             }
             await _userRepository.UpdateUser(user);
@@ -80,7 +80,7 @@ namespace PennyPal.Services
         {
             IEnumerable<ExpenseCategoryDto> categories = await _expenseCategoryService.GetUserExpenseCategories(userId);
 
-            List<ExpenseCategoryRemainDto> categoryRemains = []; 
+            List<ExpenseCategoryRemainDto> categoryRemains = [];
 
             var date = DateTime.Now;
 
@@ -90,7 +90,7 @@ namespace PennyPal.Services
 
                 foreach (var exp in cat.Expenses)
                 {
-                    if(exp.Date.Month == date.Month)
+                    if (exp.Date.Month == date.Month)
                     {
                         budget -= exp.Amount;
                     }
@@ -102,7 +102,7 @@ namespace PennyPal.Services
                     Name = cat.Name,
                     MonthlyBudget = cat.MonthlyBudget,
                     Remain = budget
-                }; 
+                };
 
                 categoryRemains.Add(category);
             }

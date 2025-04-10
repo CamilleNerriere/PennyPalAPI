@@ -1,4 +1,3 @@
-using System.Reflection.Metadata.Ecma335;
 using AutoMapper;
 using PennyPal.Data.Repositories;
 using PennyPal.Dtos;
@@ -12,8 +11,9 @@ namespace PennyPal.Services
     {
         private readonly IExpenseRepository _expenseRepository;
         private readonly IMapper _mapper;
+        private ILogger<ExpenseService> _logger;
 
-        public ExpenseService(IExpenseRepository expenseRepository)
+        public ExpenseService(IExpenseRepository expenseRepository, ILogger<ExpenseService> logger)
         {
             _expenseRepository = expenseRepository;
             _mapper = new Mapper(new MapperConfiguration(cfg =>
@@ -21,14 +21,15 @@ namespace PennyPal.Services
                 cfg.CreateMap<ExpenseToAddDto, Expense>();
                 cfg.CreateMap<ExpenseToUpdateDto, Expense>();
             }));
+            _logger = logger;
         }
 
         public async Task<Expense> GetExpenseById(int userId, int expenseId)
         {
-            var expense = await _expenseRepository.GetExpenseById(expenseId);
-
-            if(expense.UserId != userId)
+            var expense = await _expenseRepository.GetExpenseById(expenseId) ?? throw new NotFoundException("Expense not found");
+            if (expense.UserId != userId)
             {
+                _logger.LogError("Unauthorized attempt to access expense, userId : {userId}", userId);
                 throw new Unauthorized(401, "Unauthorized action.");
             }
 
@@ -83,9 +84,11 @@ namespace PennyPal.Services
 
         public async Task UpdateExpense(ExpenseToUpdateDto expense, int userId)
         {
-            
+
             if (expense.UserId != userId)
             {
+                _logger.LogError("Unauthorized attempt to update expense, userId : {userId}", userId);
+
                 throw new Unauthorized(401, "Unauthorized Update");
             }
             var expenseMapped = _mapper.Map<Expense>(expense);
@@ -100,9 +103,10 @@ namespace PennyPal.Services
 
             if (expense.UserId != userId)
             {
+                _logger.LogError("Unauthorized attempt to delete expense, userId : {userId}", userId);
                 throw new Unauthorized(401, "Unauthorized operation");
             }
-            
+
             await _expenseRepository.DeleteExpense(expenseId);
         }
 
