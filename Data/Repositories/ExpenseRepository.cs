@@ -15,7 +15,7 @@ namespace PennyPal.Data.Repositories
         }
         public async Task<Expense> GetExpenseById(int expenseId)
         {
-            Expense expense = await _entityFramework.Expense.FindAsync(expenseId)
+            var expense = await _entityFramework.Expense.FindAsync(expenseId)
                 ?? throw new NotFoundException("Expense not found");
 
             return expense;
@@ -83,7 +83,7 @@ namespace PennyPal.Data.Repositories
 
         public async Task UpdateExpense(Expense expense)
         {
-            Expense expenseToUpdate = await _entityFramework.Expense.FindAsync(expense.Id)
+            var expenseToUpdate = await _entityFramework.Expense.FindAsync(expense.Id)
                 ?? throw new NotFoundException("Expense not found");
 
             expenseToUpdate.Amount = expense.Amount != 0 ? expense.Amount : expenseToUpdate.Amount;
@@ -96,7 +96,7 @@ namespace PennyPal.Data.Repositories
 
         public async Task DeleteExpense(int expenseId)
         {
-            Expense? expense = await _entityFramework.Expense.FindAsync(expenseId) ?? throw new NotFoundException("Expense not found");
+            var expense = await _entityFramework.Expense.FindAsync(expenseId) ?? throw new NotFoundException("Expense not found");
             _entityFramework.Remove(expense);
             await _entityFramework.SaveChangesAsync();
         }

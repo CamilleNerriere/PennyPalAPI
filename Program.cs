@@ -107,7 +107,6 @@ else
 }
 
 app.UseStaticFiles();
-// app.UseResponseCompression();
 
 app.UseRouting();
 

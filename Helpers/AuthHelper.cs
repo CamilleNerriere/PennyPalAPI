@@ -33,25 +33,25 @@ namespace PennyPal.Helpers
         }
         public string CreateToken(int userId)
         {
-            Claim[] claims = new Claim[]{
+            Claim[] claims = [
                 new Claim("userId", userId.ToString())
-            };
+            ];
 
             string? tokenKeyString = _config.GetSection("AppSettings:TokenKey").Value;
 
-            SymmetricSecurityKey tokenKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+            SymmetricSecurityKey tokenKey = new(Encoding.UTF8.GetBytes(
                 tokenKeyString != null ? tokenKeyString : ""));
 
-            SigningCredentials credentials = new SigningCredentials(tokenKey, SecurityAlgorithms.HmacSha512Signature);
+            SigningCredentials credentials = new(tokenKey, SecurityAlgorithms.HmacSha512Signature);
 
-            SecurityTokenDescriptor descriptor = new SecurityTokenDescriptor()
+            SecurityTokenDescriptor descriptor = new()
             {
                 Subject = new ClaimsIdentity(claims),
                 SigningCredentials = credentials,
                 Expires = DateTime.Now.AddMinutes(15)
             };
 
-            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+            JwtSecurityTokenHandler tokenHandler = new();
 
             SecurityToken token = tokenHandler.CreateToken(descriptor);
 

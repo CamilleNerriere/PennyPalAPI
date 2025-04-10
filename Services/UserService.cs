@@ -2,7 +2,6 @@ using AutoMapper;
 using PennyPal.Data.Repositories;
 using PennyPal.Dtos;
 using PennyPal.Exceptions;
-using PennyPal.Helpers;
 using PennyPal.Models;
 
 namespace PennyPal.Services
@@ -25,20 +24,6 @@ namespace PennyPal.Services
             {
                 cfg.CreateMap<UserDto, User>();
             }));
-        }
-
-        public async Task<IEnumerable<User>> GetUsers(int userId)
-        {
-            User user = await _userRepository.GetUserById(userId) ?? throw new NotFoundException("User Not Found");
-
-            Auth auth = await _authRepository.GetAuthByEmail(user.Email) ?? throw new NotFoundException("Auth not found");
-
-            if (auth.Role != "admin")
-            {
-                throw new Unauthorized(401, "Unauthorized Operation");
-            }
-            return await _userRepository.GetUsers();
-
         }
 
         public async Task<User?> GetUserById(int userId, int userConnectedId)
@@ -67,7 +52,7 @@ namespace PennyPal.Services
 
             IEnumerable<ExpenseCategoryDto> categories = await _expenseCategoryService.GetUserExpenseCategories(userId);
 
-            Decimal budget = 0m;
+            var budget = 0m;
 
             foreach (var cat in categories)
             {
@@ -76,9 +61,9 @@ namespace PennyPal.Services
 
             List<Expense> userExpenses = await _expenseService.GetUserExpense(userId);
 
-            Decimal expenses = 0m;
+            var expenses = 0m;
 
-            DateTime date = DateTime.Now;
+            var date = DateTime.Now;
 
             foreach (var exp in userExpenses)
             {
@@ -97,7 +82,7 @@ namespace PennyPal.Services
 
             List<ExpenseCategoryRemainDto> categoryRemains = []; 
 
-            DateTime date = DateTime.Now;
+            var date = DateTime.Now;
 
             foreach (var cat in categories)
             {

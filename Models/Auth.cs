@@ -11,8 +11,6 @@ namespace PennyPal.Models
 
         public byte[] PasswordSalt { get; set; } = Array.Empty<byte>();
 
-        public string Role { get; set; } = "user";
-
         public User User { get; set; } = null!;
     }
 }

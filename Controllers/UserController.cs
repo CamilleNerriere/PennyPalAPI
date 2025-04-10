@@ -23,15 +23,6 @@ namespace PennyPal.Controllers
         }
 
         [Authorize]
-        [HttpGet("Users")]
-        public async Task<IActionResult> GetUsers()
-        {
-            int userId = UserHelper.GetUserIdAsInt(User);
-            IEnumerable<User> users =  await _userService.GetUsers(userId);
-            return Ok(users);
-        }
-
-        [Authorize]
         [HttpGet("UserRemain")]
         public async Task<IActionResult> GetUserRemain()
         {
@@ -55,7 +46,7 @@ namespace PennyPal.Controllers
         {
             int userId = UserHelper.GetUserIdAsInt(User);
             int userConnectedId = UserHelper.GetUserIdAsInt(User);
-            User? user = await _userService.GetUserById(userId, userConnectedId);
+            var user = await _userService.GetUserById(userId, userConnectedId);
             return Ok(user);
         }
 

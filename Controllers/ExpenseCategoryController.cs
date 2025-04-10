@@ -1,8 +1,6 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PennyPal.Dtos;
-using PennyPal.Exceptions;
 using PennyPal.Helpers;
 using PennyPal.Models;
 using PennyPal.Services;
@@ -43,7 +41,7 @@ namespace PennyPal.Controllers
 
             IEnumerable<ExpenseCategoryDto> categories = await _expenseCategoryService.GetUserExpenseCategories(userId);
 
-            decimal budget = 0m;
+            var budget = 0m;
 
             foreach (var cat in categories)
             {
@@ -57,9 +55,10 @@ namespace PennyPal.Controllers
         [Authorize]
         public async Task<IActionResult> GetExpenseCategoryById(int expenseCategoryId)
         {
-            int userId = UserHelper.GetUserIdAsInt(User);
+            var userId = UserHelper.GetUserIdAsInt(User);
 
             ExpenseCategory? category = await _expenseCategoryService.GetExpenseCategoryById(expenseCategoryId, userId);
+
             if (category == null)
             {
                 return NotFound("Category not found");
@@ -71,7 +70,7 @@ namespace PennyPal.Controllers
         [Authorize]
         public async Task<IActionResult> AddExpenseCategory(ExpenseCategoryForRegistrationDto expenseCategory)
         {
-            int userId = UserHelper.GetUserIdAsInt(User);
+            var userId = UserHelper.GetUserIdAsInt(User);
 
             expenseCategory.UserId = userId;
 
@@ -84,7 +83,7 @@ namespace PennyPal.Controllers
         [Authorize]
         public async Task<IActionResult> UpdateExpenseCategory(ExpenseCategoryForUpdateDto expenseCategory)
         {
-            int userId = UserHelper.GetUserIdAsInt(User);
+            var userId = UserHelper.GetUserIdAsInt(User);
 
             expenseCategory.UserId = userId;
 

@@ -36,7 +36,7 @@ namespace PennyPal.Data.Repositories
                 throw new CustomValidationException("Auth object is null or empty");
             }
 
-            Auth? authToUpdate = await _entityFramework.Auth.FindAsync(auth.Email) ?? throw new NotFoundException("User not found");
+            var authToUpdate = await _entityFramework.Auth.FindAsync(auth.Email) ?? throw new NotFoundException("User not found");
             authToUpdate.PasswordHash = auth.PasswordHash ?? authToUpdate.PasswordHash;
             authToUpdate.PasswordSalt = auth.PasswordSalt ?? authToUpdate.PasswordSalt;
 
@@ -45,7 +45,7 @@ namespace PennyPal.Data.Repositories
 
         public async Task DeleteAuth(Auth auth)
         {
-            Auth? authToDelete = await _entityFramework.Auth.FindAsync(auth.Email) ?? throw new NotFoundException("User not found - AUTH");
+            var authToDelete = await _entityFramework.Auth.FindAsync(auth.Email) ?? throw new NotFoundException("User not found - AUTH");
             _entityFramework.Remove(authToDelete);
         }
 

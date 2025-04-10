@@ -24,14 +24,10 @@ namespace PennyPal.Data.Repositories
 
         public async Task<User?> GetUserById(int userId)
         {
-            User? user = await _entityFramework.User.FindAsync(userId);
+            var user = await _entityFramework.User.FindAsync(userId) ?? throw new NotFoundException($"User {userId} not found");
 
-            if (user != null)
-            {
-                return user;
-            }
+            return user;
 
-            throw new NotFoundException($"User {userId} not found");
         }
 
         public async Task<User?> GetUserByEmail(UserDto userDto)
@@ -58,7 +54,7 @@ namespace PennyPal.Data.Repositories
             {
                 throw new CustomValidationException("User object is null or emptuy");
             }
-            User? userToUpdate = await _entityFramework.User.FindAsync(user.Id) ?? throw new NotFoundException("User not Found - USER");
+            var userToUpdate = await _entityFramework.User.FindAsync(user.Id) ?? throw new NotFoundException("User not Found");
             userToUpdate.Firstname = user.Firstname ?? userToUpdate.Firstname;
             userToUpdate.Lastname = user.Lastname ?? userToUpdate.Lastname;
 
@@ -68,19 +64,12 @@ namespace PennyPal.Data.Repositories
 
         public async Task DeleteUser(int userId)
         {
-            User? user = await _entityFramework.User.FindAsync(userId);
+            var user = await _entityFramework.User.FindAsync(userId) ?? throw new NotFoundException("User not found");
 
-            if (user != null)
-            {
-                _entityFramework.Remove(user);
-            }
-            else
-            {
-                throw new NotFoundException("User not found");
+            _entityFramework.Remove(user);
 
-            }
         }
-        public async Task SaveChangesAsync(CancellationToken cancellationToken=default)
+        public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             await _entityFramework.SaveChangesAsync(cancellationToken);
         }

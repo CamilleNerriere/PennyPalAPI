@@ -37,7 +37,7 @@ namespace PennyPal.Services
         public async Task<ExpenseCategory?> GetExpenseCategoryById(int expenseCategoryId, int userId)
         {   
 
-            ExpenseCategory? category =  await _expenseCategoryRepository.GetExpenseCategoryById(expenseCategoryId);
+            var category =  await _expenseCategoryRepository.GetExpenseCategoryById(expenseCategoryId);
 
             if(category != null && category.UserId != userId)
             {
@@ -54,7 +54,7 @@ namespace PennyPal.Services
 
         public async Task UpdateExpenseCategory(ExpenseCategoryForUpdateDto expenseCategory, int userId)
         {
-            ExpenseCategory expenseCategoryToUpdate = await _expenseCategoryRepository.GetExpenseCategoryById(expenseCategory.Id)
+            var expenseCategoryToUpdate = await _expenseCategoryRepository.GetExpenseCategoryById(expenseCategory.Id)
                 ?? throw new NotFoundException("Category Not Found");
             
             if(expenseCategoryToUpdate.UserId != userId)
@@ -68,7 +68,7 @@ namespace PennyPal.Services
 
         public async Task DeleteExpenseCategory(int expenseCategoryId, int userId)
         {
-            ExpenseCategory? expenseCategoryToDelete = await _expenseCategoryRepository.GetExpenseCategoryById(expenseCategoryId)
+            var expenseCategoryToDelete = await _expenseCategoryRepository.GetExpenseCategoryById(expenseCategoryId)
                 ?? throw new NotFoundException("Expense Cateogy not found");
             
             if(expenseCategoryToDelete.UserId != userId)

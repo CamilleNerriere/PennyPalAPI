@@ -1,11 +1,6 @@
-using System.ComponentModel.DataAnnotations;
 using System.Security.Cryptography;
-using System.Transactions;
 using AutoMapper;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore.Storage;
-using PennyPal.Data;
 using PennyPal.Data.Repositories;
 using PennyPal.Dtos;
 using PennyPal.Exceptions;
@@ -20,7 +15,6 @@ namespace PennyPal.Services
         private readonly IUserRepository _userRepository;
         private readonly AuthHelper _authHelper;
         private readonly IMapper _mapper;
-
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         private readonly IRefreshTokenRepository _refreshTokenRepository;
@@ -45,7 +39,7 @@ namespace PennyPal.Services
                 throw new CustomValidationException("Password and Confirm Password must be the same");
             }
 
-            Auth? auth = await _authRepository.GetAuthByEmail(user.Email);
+            var auth = await _authRepository.GetAuthByEmail(user.Email);
 
             if (auth != null)
             {
@@ -65,7 +59,6 @@ namespace PennyPal.Services
                 Email = user.Email,
                 PasswordHash = passwordHash,
                 PasswordSalt = passwordSalt,
-                Role = "user"
             };
 
             User userToRegister = new()
@@ -111,7 +104,7 @@ namespace PennyPal.Services
                 throw new CustomValidationException("No user informations given");
             }
 
-            Auth? userToLog = await _authRepository.GetAuthByEmail(user.Email) ?? throw new NotFoundException("Invalid credentials");
+            var userToLog = await _authRepository.GetAuthByEmail(user.Email) ?? throw new NotFoundException("Invalid credentials");
 
             byte[] passwordHash = _authHelper.GetPasswordHash(user.Password, userToLog.PasswordSalt);
 
@@ -125,7 +118,7 @@ namespace PennyPal.Services
 
             UserDto UserMapped = _mapper.Map<UserDto>(user);
 
-            User? userComplete = await _userRepository.GetUserByEmail(UserMapped) ?? throw new NotFoundException("User not found");
+            var userComplete = await _userRepository.GetUserByEmail(UserMapped) ?? throw new NotFoundException("User not found");
 
             var accessToken = _authHelper.CreateToken(userComplete.Id);
             var refreshToken = _authHelper.GenerateRefreshToken();
@@ -197,7 +190,7 @@ namespace PennyPal.Services
                 throw new Exception("Password and Confirm Password must match");
             }
 
-            User userConnected = await _userRepository.GetUserById(userId) ?? throw new NotFoundException("User not found");
+            var userConnected = await _userRepository.GetUserById(userId) ?? throw new NotFoundException("User not found");
 
             byte[] passwordSalt = new byte[128 / 8];
             using (RandomNumberGenerator rng = RandomNumberGenerator.Create())

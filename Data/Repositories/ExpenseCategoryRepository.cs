@@ -37,7 +37,7 @@ namespace PennyPal.Data.Repositories
                 throw new CustomValidationException("Expense Category is null");
             }
 
-            ExpenseCategory expenseCategoryMap = _mapper.Map<ExpenseCategory>(expenseCategory);
+            var expenseCategoryMap = _mapper.Map<ExpenseCategory>(expenseCategory);
 
             await _entityFramework.ExpenseCategory.AddAsync(expenseCategoryMap);
             await _entityFramework.SaveChangesAsync();
@@ -52,7 +52,7 @@ namespace PennyPal.Data.Repositories
                 throw new CustomValidationException("Expense Category null or empty");
             }
 
-            ExpenseCategory? expenseCategoryToUpdate = await _entityFramework.ExpenseCategory.FindAsync(expenseCategory.Id) ?? throw new NotFoundException("Expense Category Not Found");
+            var expenseCategoryToUpdate = await _entityFramework.ExpenseCategory.FindAsync(expenseCategory.Id) ?? throw new NotFoundException("Expense Category Not Found");
             expenseCategoryToUpdate.Name = expenseCategory.Name ?? expenseCategoryToUpdate.Name;
             if(expenseCategory.MonthlyBudget != expenseCategoryToUpdate.MonthlyBudget)
             {
@@ -63,7 +63,7 @@ namespace PennyPal.Data.Repositories
 
         public async Task DeleteExpenseCategory(int expenseCategoryId)
         {
-            ExpenseCategory ? expenseCategory = await _entityFramework.ExpenseCategory.FindAsync(expenseCategoryId) ?? throw new NotFoundException("Expense Category not found");
+            var expenseCategory = await _entityFramework.ExpenseCategory.FindAsync(expenseCategoryId) ?? throw new NotFoundException("Expense Category not found");
             _entityFramework.Remove(expenseCategory);
             await _entityFramework.SaveChangesAsync();
         }

@@ -25,7 +25,7 @@ namespace PennyPal.Services
 
         public async Task<Expense> GetExpenseById(int userId, int expenseId)
         {
-            Expense expense = await _expenseRepository.GetExpenseById(expenseId);
+            var expense = await _expenseRepository.GetExpenseById(expenseId);
 
             if(expense.UserId != userId)
             {
@@ -48,7 +48,7 @@ namespace PennyPal.Services
 
             int numberOfExpenses = expenses.Count();
 
-            int GetMonthDifference(DateTime startDate, DateTime endDate)
+            static int GetMonthDifference(DateTime startDate, DateTime endDate)
             {
                 return ((endDate.Year - startDate.Year) * 12) + endDate.Month - startDate.Month;
             }
@@ -77,19 +77,18 @@ namespace PennyPal.Services
 
         public async Task AddExpense(ExpenseToAddDto expense)
         {
-            Expense expenseMapped = _mapper.Map<Expense>(expense);
+            var expenseMapped = _mapper.Map<Expense>(expense);
             await _expenseRepository.AddExpense(expenseMapped);
         }
 
         public async Task UpdateExpense(ExpenseToUpdateDto expense, int userId)
         {
-            Console.WriteLine($"{expense.UserId}, {userId}");
             
             if (expense.UserId != userId)
             {
                 throw new Unauthorized(401, "Unauthorized Update");
             }
-            Expense expenseMapped = _mapper.Map<Expense>(expense);
+            var expenseMapped = _mapper.Map<Expense>(expense);
 
             await _expenseRepository.UpdateExpense(expenseMapped);
         }
@@ -97,7 +96,7 @@ namespace PennyPal.Services
         public async Task DeleteExpense(int expenseId, int userId)
         {
 
-            Expense expense = await _expenseRepository.GetExpenseById(expenseId);
+            var expense = await _expenseRepository.GetExpenseById(expenseId);
 
             if (expense.UserId != userId)
             {

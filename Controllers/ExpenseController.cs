@@ -1,9 +1,6 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Mvc;
 using PennyPal.Dtos;
-using PennyPal.Exceptions;
 using PennyPal.Helpers;
 using PennyPal.Models;
 using PennyPal.Services;
@@ -27,7 +24,7 @@ namespace PennyPal.Controllers
         {
             int userId = UserHelper.GetUserIdAsInt(User);
 
-            Expense expense = await _expenseService.GetExpenseById(userId, expenseId);
+            var expense = await _expenseService.GetExpenseById(userId, expenseId);
 
             return Ok(expense);
 
