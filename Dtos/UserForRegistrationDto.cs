@@ -6,12 +6,10 @@ namespace PennyPal.Dtos
     {
         [Required(ErrorMessage = "Lastname is required")]
         [MaxLength(50, ErrorMessage = "Lastname cannot exceed 50 characters.")]
-        [RegularExpression(@"^[A-Za-zÀ-ÖØ-öø-ÿ-]+$", ErrorMessage = "Lastname contains invalid characters.")]
         public required string Lastname { get; set; }
 
         [Required(ErrorMessage = "Lastname is required")]
         [MaxLength(50, ErrorMessage = "Lastname cannot exceed 50 characters.")]
-        [RegularExpression(@"^[A-Za-zÀ-ÖØ-öø-ÿ-]+$", ErrorMessage = "Lastname contains invalid characters.")]
         public required string Firstname { get; set; }
 
         [Required(ErrorMessage = "Email is required")]

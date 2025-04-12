@@ -19,9 +19,9 @@ builder.Services.AddControllers(options =>
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 
 string? React_URL = builder.Configuration.GetSection("AppSettings:React_URL").Value;
 
@@ -77,6 +77,9 @@ builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
 builder.Services.AddHttpContextAccessor();
 
+// Add to make docker app accessible from outside
+builder.WebHost.UseUrls("http://0.0.0.0:5000");
+
 
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
@@ -97,6 +100,8 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
 
 var app = builder.Build();
 
+Log.Information("✅ Application PennyPal started");
+
 app.UseMiddleware<GlobalExceptionMiddleware>();
 // Security HTTP Middleware.
 if (app.Environment.IsDevelopment())
@@ -115,8 +120,6 @@ else
 
 app.UseRouting();
 
-app.UseCookiePolicy();
-
 if (app.Environment.IsDevelopment())
 {
     app.UseCors("DevCors");
@@ -128,12 +131,14 @@ else
 
 }
 
+app.UseCookiePolicy();
+
+
 app.UseAuthentication();
 
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapOpenApi();
 
 app.Run();
 
