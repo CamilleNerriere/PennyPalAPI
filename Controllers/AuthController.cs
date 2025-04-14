@@ -13,10 +13,12 @@ namespace PennyPal.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
+        private readonly IWebHostEnvironment _env;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, IWebHostEnvironment env)
         {
             _authService = authService;
+            _env = env;
         }
 
         [HttpPost("Register")]
@@ -33,9 +35,8 @@ namespace PennyPal.Controllers
             HttpContext.Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
             {
                 HttpOnly = true,
-                // change in prod
-                Secure = false,
-                SameSite = SameSiteMode.Lax,
+                Secure = _env.IsProduction(),
+                SameSite = _env.IsProduction() ? SameSiteMode.Strict : SameSiteMode.Lax,
                 Expires = refreshExpiry
             });
 
@@ -57,9 +58,8 @@ namespace PennyPal.Controllers
             Response.Cookies.Append("refreshToken", newRefreshToken, new CookieOptions
             {
                 HttpOnly = true,
-                // change in prod
-                Secure = false,
-                SameSite = SameSiteMode.Lax,
+                Secure = _env.IsProduction(),
+                SameSite = _env.IsProduction() ? SameSiteMode.Strict : SameSiteMode.Lax,
                 Expires = refreshExpiry
             }
             );

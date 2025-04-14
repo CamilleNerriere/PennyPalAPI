@@ -7,11 +7,13 @@ namespace PennyPal.Middlewares
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<GlobalExceptionMiddleware> _logger;
+        private readonly IWebHostEnvironment _env;
 
-        public GlobalExceptionMiddleware(RequestDelegate next, ILogger<GlobalExceptionMiddleware> logger)
+        public GlobalExceptionMiddleware(RequestDelegate next, ILogger<GlobalExceptionMiddleware> logger, IWebHostEnvironment env)
         {
             _next = next;
             _logger = logger;
+            _env = env;
         }
 
         public async Task Invoke(HttpContext context)
@@ -24,11 +26,11 @@ namespace PennyPal.Middlewares
             {
                 
                 _logger.LogError(ex, "Unhandle Error");
-                await HandleExceptionAsync(context, ex);
+                await HandleExceptionAsync(context, ex, _env);
             }
         }
 
-        private static Task HandleExceptionAsync(HttpContext context, Exception ex)
+        private static Task HandleExceptionAsync(HttpContext context, Exception ex, IWebHostEnvironment env)
         {
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
@@ -37,7 +39,7 @@ namespace PennyPal.Middlewares
             {
                 StatusCode = context.Response.StatusCode,
                 Message = "An error occured. Please Try latter.",
-                Details = ex.Message // NE PAS OUBLIER DE SUPPRIMER EN PROD !!!
+                Details = env.IsDevelopment() ? ex.Message : "" 
             };
 
             return context.Response.WriteAsync(JsonSerializer.Serialize(response));

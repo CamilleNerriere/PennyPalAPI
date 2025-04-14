@@ -10,6 +10,8 @@ using PennyPal.Services;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+var env = builder.Environment;
+var isProd = env.IsProduction();
 
 builder.Services.AddControllers(options =>
 {
@@ -52,9 +54,11 @@ TokenValidationParameters tokenValidationParameters = new TokenValidationParamet
 {
     IssuerSigningKey = tokenKey,
     ValidateIssuer = false,
-    ValidateIssuerSigningKey = false,
-    ValidateAudience = false
-}; // Il faudrait en réalité ici check si on est en développement/ en prod, ce serait différent 
+    ValidateIssuerSigningKey = isProd,
+    ValidateAudience = false, 
+    ValidateLifetime = true,
+    ClockSkew = TimeSpan.Zero,
+}; 
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -95,7 +99,7 @@ builder.Host.UseSerilog();
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {
     options.MinimumSameSitePolicy = SameSiteMode.Unspecified;
-    options.Secure = CookieSecurePolicy.None;
+    options.Secure = isProd ? CookieSecurePolicy.Always : CookieSecurePolicy.None;
 });
 
 var app = builder.Build();
@@ -119,6 +123,8 @@ else
 }
 
 app.UseRouting();
+
+app.UseMiddleware<SecurityHeadersMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
