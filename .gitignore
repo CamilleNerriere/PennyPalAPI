@@ -490,3 +490,5 @@ appsettings.json
 appsettings.Development.json
 
 appsettings.Production.json
+
+04_seed_data_private.sql
