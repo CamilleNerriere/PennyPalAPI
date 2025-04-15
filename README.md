@@ -28,7 +28,7 @@ You can use the backend separately, but you will need to:
 
     Configure the connection string in appsettings.Development.json
 
-    Run the SQL scripts provided in the scripts/ folder to create tables and seed initial data
+    Run the SQL scripts provided in the SQL/ folder to create tables and seed initial data
 
 ### Option 2 – Docker setup (recommended)
 
